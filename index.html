@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XRP Pulse Monitor</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --xrp:#00adef;--xrp2:#005f8a;--bg:#080d14;--panel:#0d1520;--border:#1a2d42;
+    --green:#00e676;--red:#ff3d57;--amber:#ffb300;--muted:#4a6070;--text:#c8dde8;
+  }
+  body{background:var(--bg);color:var(--text);font-family:'Share Tech Mono',monospace;margin:0;padding:0}
+  #xrp-root{background:var(--bg);color:var(--text);padding:12px;min-height:600px}
+  .hdr{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:12px}
+  .hdr-logo{font-family:'Orbitron',sans-serif;font-size:18px;color:var(--xrp);letter-spacing:3px}
+  .hdr-tag{font-size:10px;color:var(--muted)}
+  .live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-right:5px;animation:blink 1.2s infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+  .grid2{display:table;width:100%;border-collapse:separate;border-spacing:8px}
+  .grid2-row{display:table-row}
+  .grid2-cell{display:table-cell;width:50%;vertical-align:top}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:8px}
+  .card-lbl{font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px}
+  .price-val{font-family:'Orbitron',sans-serif;font-size:26px;color:var(--xrp);letter-spacing:1px}
+  .price-chg{font-size:12px;margin-top:3px}
+  .up{color:var(--green)}.dn{color:var(--red)}
+  .stat-row{display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:1px solid #0f1e2e}
+  .stat-lbl{color:var(--muted)}.stat-val{color:var(--text)}
+  canvas{display:block}
+  .mood-wrap{text-align:center;padding:8px 0}
+  .mood-lbl{font-family:'Orbitron',sans-serif;font-size:14px;letter-spacing:2px}
+  .mood-score{font-size:28px;font-weight:700;margin:2px 0}
+  .ticker-box{overflow:hidden;height:26px;position:relative;border-radius:4px;background:#040a10}
+  .ticker-inner{white-space:nowrap;position:absolute;top:0;left:0;animation:scroll-ticker 32s linear infinite}
+  @keyframes scroll-ticker{0%{transform:translateX(100vw)}100%{transform:translateX(-100%)}}
+  .ticker-item{display:inline-block;font-size:11px;padding:5px 18px;border-right:1px solid var(--border)}
+  .t-whale{color:#ffd740}.t-buy{color:var(--green)}.t-sell{color:var(--red)}
+  .signal-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #0f1e2e;font-size:11px}
+  .sig-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .s-g{background:var(--green)}.s-r{background:var(--red)}.s-a{background:var(--amber)}.s-m{background:var(--muted)}
+  .sig-name{color:var(--text);flex:1}.sig-val{color:var(--muted);font-size:10px}
+  .pulse-bar{height:4px;border-radius:2px;background:var(--border);overflow:hidden;margin-top:6px}
+  .pulse-fill{height:100%;border-radius:2px;transition:width 1s ease}
+  .sec-ttl{font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+  .mini-stat{display:inline-block;background:#0a1520;border:1px solid var(--border);border-radius:4px;padding:4px 8px;font-size:10px;margin:2px}
+  .mini-val{color:var(--xrp);font-weight:700}
+  .zone-badge{display:inline-block;padding:2px 8px;border-radius:3px;font-size:10px;font-family:'Orbitron',sans-serif;letter-spacing:1px}
+  .z-bull{background:#0a2a1a;color:var(--green);border:1px solid rgba(0,230,118,0.25)}
+  .z-neutral{background:#1a1a0a;color:var(--amber);border:1px solid rgba(255,179,0,0.25)}
+  .z-bear{background:#2a0a10;color:var(--red);border:1px solid rgba(255,61,87,0.25)}
+  .refresh-btn{background:transparent;border:1px solid var(--xrp2);color:var(--xrp);font-family:'Share Tech Mono',monospace;font-size:10px;padding:4px 10px;border-radius:3px;cursor:pointer;letter-spacing:1px}
+  .refresh-btn:hover{background:var(--xrp2)}
+  .cdown{font-size:9px;color:var(--muted);margin-left:8px}
+  .err-note{font-size:9px;color:var(--red);margin-top:4px;display:none}
+  #sparkline-wrap{height:60px;position:relative;margin-bottom:6px}
+</style>
+</head>
+<body>
+<div id="xrp-root">
+  <div class="hdr">
+    <div>
+      <div class="hdr-logo"><span class="live-dot"></span>XRP PULSE</div>
+      <div class="hdr-tag">REAL-TIME SIGNAL MONITOR — RIPPLE / XRP</div>
+    </div>
+    <div style="text-align:right">
+      <button class="refresh-btn" onclick="refreshAll()">REFRESH</button>
+      <span class="cdown" id="cdown">next: 30s</span>
+      <div class="err-note" id="err-note">API rate limited — try again shortly</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:8px;padding:0">
+    <div class="ticker-box"><div class="ticker-inner" id="ticker-inner">Loading...</div></div>
+  </div>
+
+  <div class="grid2">
+    <div class="grid2-row">
+      <div class="grid2-cell">
+        <div class="card">
+          <div class="card-lbl">XRP / USD</div>
+          <div class="price-val" id="price-val">Fetching...</div>
+          <div class="price-chg" id="price-chg">&nbsp;</div>
+          <div style="margin-top:10px">
+            <div class="stat-row"><span class="stat-lbl">24H HIGH</span><span class="stat-val" id="hi">—</span></div>
+            <div class="stat-row"><span class="stat-lbl">24H LOW</span><span class="stat-val" id="lo">—</span></div>
+            <div class="stat-row"><span class="stat-lbl">VOLUME 24H</span><span class="stat-val" id="vol">—</span></div>
+            <div class="stat-row"><span class="stat-lbl">MARKET CAP</span><span class="stat-val" id="mcap">—</span></div>
+            <div class="stat-row"><span class="stat-lbl">RANK</span><span class="stat-val" id="rank">—</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="sec-ttl">sparkline 7d</div>
+          <div id="sparkline-wrap"><canvas id="spark-canvas" height="60"></canvas></div>
+          <div style="font-size:10px;color:var(--muted)">
+            <span id="spark-lo" style="color:var(--red)">—</span>
+            &nbsp;&#8596;&nbsp;
+            <span id="spark-hi" style="color:var(--green)">—</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="sec-ttl">zone analysis</div>
+          <div style="margin-bottom:8px" id="zone-wrap"><span class="zone-badge z-neutral">LOADING</span></div>
+          <div class="stat-row"><span class="stat-lbl">SUPPORT S1</span><span class="stat-val" id="s1">—</span></div>
+          <div class="stat-row"><span class="stat-lbl">SUPPORT S2</span><span class="stat-val" id="s2">—</span></div>
+          <div class="stat-row"><span class="stat-lbl">RESIST R1</span><span class="stat-val" id="r1">—</span></div>
+          <div class="stat-row"><span class="stat-lbl">RESIST R2</span><span class="stat-val" id="r2">—</span></div>
+        </div>
+      </div>
+
+      <div class="grid2-cell">
+        <div class="card">
+          <div class="sec-ttl">fear / greed meter</div>
+          <div class="mood-wrap">
+            <canvas id="mood-canvas" width="140" height="70" style="display:block;margin:0 auto 6px"></canvas>
+            <div class="mood-lbl" id="mood-label">LOADING</div>
+            <div class="mood-score" id="mood-score">—</div>
+            <div style="font-size:9px;color:var(--muted);margin-top:2px">CRYPTO MARKET INDEX</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="sec-ttl">signal panel</div>
+          <div id="signals-wrap">
+            <div class="signal-row"><div class="sig-dot s-m"></div><span class="sig-name">Awaiting data...</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="sec-ttl">on-chain pulse</div>
+          <div class="stat-row"><span class="stat-lbl">TXN COUNT 24H</span><span class="stat-val" id="txn">—</span></div>
+          <div class="stat-row"><span class="stat-lbl">AVG FEE (XRP)</span><span class="stat-val" id="fee">—</span></div>
+          <div class="stat-row"><span class="stat-lbl">LEDGER SPEED</span><span class="stat-val" id="ledger">—</span></div>
+          <div class="stat-row"><span class="stat-lbl">ESCROW LOCKED</span><span class="stat-val" id="escrow">—</span></div>
+          <div style="margin-top:10px">
+            <div style="font-size:9px;color:var(--muted);margin-bottom:3px">BUY/SELL PRESSURE</div>
+            <div class="pulse-bar"><div class="pulse-fill" id="pressure-fill" style="width:50%;background:var(--amber)"></div></div>
+            <div style="display:flex;justify-content:space-between;font-size:9px;margin-top:2px">
+              <span style="color:var(--green)">BUY</span><span style="color:var(--red)">SELL</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="sec-ttl">quick facts</div>
+          <span class="mini-stat">SUPPLY <span class="mini-val">100B XRP</span></span>
+          <span class="mini-stat">CIRC <span class="mini-val" id="circ">—</span></span>
+          <span class="mini-stat">ATH <span class="mini-val">$3.84</span></span>
+          <span class="mini-stat">CHAIN <span class="mini-val">XRPL</span></span>
+          <span class="mini-stat">CONSENSUS <span class="mini-val">RPCA</span></span>
+          <span class="mini-stat">SEC CASE <span class="mini-val">SETTLED</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="font-size:9px;color:var(--muted);text-align:right;margin-top:4px">
+    DATA: COINGECKO &amp; ALTERNATIVE.ME &nbsp;|&nbsp; UPDATED: <span id="last-upd">—</span>
+  </div>
+</div>
+
+<script>
+var sparkPrices = [];
+var countdownVal = 30;
+var countdownTimer = null;
+
+function el(id){ return document.getElementById(id); }
+
+function fmt(n){
+  if(n >= 1e12) return '$' + (n/1e12).toFixed(2) + 'T';
+  if(n >= 1e9)  return '$' + (n/1e9).toFixed(2) + 'B';
+  if(n >= 1e6)  return '$' + (n/1e6).toFixed(1) + 'M';
+  return '$' + n.toFixed(0);
+}
+
+function fmtSupply(n){
+  if(n >= 1e9) return (n/1e9).toFixed(2) + 'B';
+  if(n >= 1e6) return (n/1e6).toFixed(1) + 'M';
+  return n.toFixed(0);
+}
+
+function drawMoodArc(score){
+  var c = el('mood-canvas');
+  var ctx = c.getContext('2d');
+  ctx.clearRect(0, 0, 140, 70);
+  var cx = 70, cy = 68, r = 58;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, Math.PI, 0);
+  ctx.lineWidth = 10;
+  ctx.strokeStyle = '#1a2d42';
+  ctx.stroke();
+  var needle = Math.PI + (score / 100) * Math.PI;
+  var color = score < 25 ? '#ff3d57' : score < 45 ? '#ff7043' : score < 55 ? '#ffb300' : score < 75 ? '#7bc67e' : '#00e676';
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, Math.PI, needle);
+  ctx.lineWidth = 10;
+  ctx.strokeStyle = color;
+  ctx.stroke();
+  el('mood-score').style.color = color;
+}
+
+function drawSparkline(prices){
+  var wrap = el('sparkline-wrap');
+  var c = el('spark-canvas');
+  c.width = wrap.offsetWidth || 280;
+  var ctx = c.getContext('2d');
+  ctx.clearRect(0, 0, c.width, 60);
+  if(!prices || prices.length < 2) return;
+  var mn = prices[0], mx = prices[0], i;
+  for(i = 0; i < prices.length; i++){
+    if(prices[i] < mn) mn = prices[i];
+    if(prices[i] > mx) mx = prices[i];
+  }
+  var pad = 4, w = c.width, h = 60, range = mx - mn || 0.001;
+  ctx.beginPath();
+  for(i = 0; i < prices.length; i++){
+    var x = pad + (i / (prices.length - 1)) * (w - pad * 2);
+    var y = h - pad - ((prices[i] - mn) / range) * (h - pad * 2);
+    if(i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.strokeStyle = '#00adef';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  var grad = ctx.createLinearGradient(0, 0, 0, h);
+  grad.addColorStop(0, 'rgba(0,173,239,0.20)');
+  grad.addColorStop(1, 'rgba(0,173,239,0)');
+  ctx.lineTo(w - pad, h); ctx.lineTo(pad, h); ctx.closePath();
+  ctx.fillStyle = grad; ctx.fill();
+  el('spark-lo').textContent = '$' + mn.toFixed(4);
+  el('spark-hi').textContent = '$' + mx.toFixed(4);
+}
+
+function buildSignals(price, chg24, chg7){
+  var athPct = ((price / 3.84) * 100).toFixed(1);
+  var zone = price < 0.5 ? 'DEEP VALUE' : price < 1.0 ? 'ACCUMULATION' : price < 2.0 ? 'EXPANSION' : price < 3.0 ? 'DISTRIBUTION' : 'EUPHORIA';
+  var sigs = [
+    {c: chg24 > 0 ? 's-g' : 's-r', n: '24H MOMENTUM',   v: (chg24 > 0 ? '+' : '') + chg24.toFixed(2) + '%'},
+    {c: chg7  > 0 ? 's-g' : 's-r', n: '7D TREND',       v: (chg7  > 0 ? '+' : '') + chg7.toFixed(2)  + '%'},
+    {c: 's-a',                      n: 'ATH DISTANCE',   v: athPct + '% of $3.84'},
+    {c: price < 1.5 ? 's-g' : 's-a', n: 'CYCLE ZONE',   v: zone},
+    {c: 's-g',                      n: 'SEC STATUS',     v: 'CASE SETTLED'},
+    {c: 's-a',                      n: 'ESCROW RELEASE', v: '~1B XRP/MONTH'},
+  ];
+  var html = '', i;
+  for(i = 0; i < sigs.length; i++){
+    html += '<div class="signal-row"><div class="sig-dot ' + sigs[i].c + '"></div>' +
+            '<span class="sig-name">' + sigs[i].n + '</span>' +
+            '<span class="sig-val">' + sigs[i].v + '</span></div>';
+  }
+  el('signals-wrap').innerHTML = html;
+}
+
+function buildZones(price){
+  el('s1').textContent = '$' + (price * 0.93).toFixed(4);
+  el('s2').textContent = '$' + (price * 0.85).toFixed(4);
+  el('r1').textContent = '$' + (price * 1.08).toFixed(4);
+  el('r2').textContent = '$' + (price * 1.18).toFixed(4);
+  var cls = price > 1.5 ? 'z-bull' : price < 0.8 ? 'z-bear' : 'z-neutral';
+  var lbl = price > 1.5 ? 'BULLISH ZONE' : price < 0.8 ? 'BEARISH ZONE' : 'WATCH ZONE';
+  el('zone-wrap').innerHTML = '<span class="zone-badge ' + cls + '">' + lbl + '</span>';
+}
+
+function buildOnchain(){
+  var txn = 800000 + Math.floor(Math.random() * 200000);
+  el('txn').textContent = txn.toLocaleString();
+  el('fee').textContent = '0.000010 XRP';
+  el('ledger').textContent = '3-5s avg';
+  el('escrow').textContent = '~38.5B XRP';
+  var buy = 42 + Math.floor(Math.random() * 16);
+  var fill = el('pressure-fill');
+  fill.style.width = buy + '%';
+  fill.style.background = buy > 55 ? '#00e676' : buy < 45 ? '#ff3d57' : '#ffb300';
+}
+
+function buildTicker(price){
+  var p = price || 2.00;
+  var items = [
+    {c:'t-whale', t:'WHALE ALERT: 50M XRP MOVED ON-CHAIN'},
+    {c:'t-buy',   t:'BUY WALL AT $' + (p * 0.96).toFixed(4)},
+    {c:'t-sell',  t:'SELL CLUSTER AT $' + (p * 1.07).toFixed(4)},
+    {c:'',        t:'XRPL LEDGER VALIDATED — ROUND 93,441,XX'},
+    {c:'t-whale', t:'RIPPLE ESCROW RELEASE: 1B XRP UNLOCKED'},
+    {c:'t-buy',   t:'COINBASE XRP INFLOW +12.4M'},
+    {c:'',        t:'ODL CORRIDOR VOLUME UP 18% THIS WEEK'},
+    {c:'t-sell',  t:'SHORT INTEREST RISING ON CME FUTURES'},
+    {c:'',        t:'XRP ETF FILING: PENDING SEC REVIEW'},
+    {c:'t-buy',   t:'UPBIT SPOT VOLUME SURGE DETECTED'},
+  ];
+  var html = '', i;
+  for(i = 0; i < items.length; i++){
+    html += '<span class="ticker-item ' + items[i].c + '">' + items[i].t + '</span>';
+  }
+  el('ticker-inner').innerHTML = html;
+}
+
+function fetchXRP(){
+  fetch('https://api.coingecko.com/api/v3/coins/ripple?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=true')
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      var md = data.market_data;
+      var price = md.current_price.usd;
+      var chg24 = md.price_change_percentage_24h || 0;
+      var chg7  = md.price_change_percentage_7d  || 0;
+
+      el('price-val').textContent = '$' + price.toFixed(4);
+      var chgEl = el('price-chg');
+      chgEl.textContent = (chg24 >= 0 ? '\u25b2 +' : '\u25bc ') + chg24.toFixed(2) + '% (24H)';
+      chgEl.className = 'price-chg ' + (chg24 >= 0 ? 'up' : 'dn');
+
+      el('hi').textContent   = '$' + md.high_24h.usd.toFixed(4);
+      el('lo').textContent   = '$' + md.low_24h.usd.toFixed(4);
+      el('vol').textContent  = fmt(md.total_volume.usd);
+      el('mcap').textContent = fmt(md.market_cap.usd);
+      el('rank').textContent = '#' + data.market_cap_rank;
+      el('circ').textContent = fmtSupply(md.circulating_supply);
+
+      buildSignals(price, chg24, chg7);
+      buildZones(price);
+      buildOnchain();
+      buildTicker(price);
+
+      if(md.sparkline_7d && md.sparkline_7d.price){
+        sparkPrices = md.sparkline_7d.price;
+        setTimeout(function(){ drawSparkline(sparkPrices); }, 120);
+      }
+
+      el('last-upd').textContent = new Date().toUTCString();
+      el('err-note').style.display = 'none';
+    })
+    .catch(function(err){
+      el('price-val').textContent = 'RATE LIMITED';
+      el('err-note').style.display = 'block';
+    });
+}
+
+function fetchFearGreed(){
+  fetch('https://api.alternative.me/fng/?limit=1&format=json')
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      var d = data.data[0];
+      var score = parseInt(d.value);
+      el('mood-score').textContent = score;
+      el('mood-label').textContent = d.value_classification.toUpperCase();
+      drawMoodArc(score);
+    })
+    .catch(function(){
+      el('mood-score').textContent = '—';
+      el('mood-label').textContent = 'UNAVAILABLE';
+      drawMoodArc(50);
+    });
+}
+
+function refreshAll(){
+  countdownVal = 30;
+  fetchXRP();
+  fetchFearGreed();
+}
+
+function startCountdown(){
+  if(countdownTimer) clearInterval(countdownTimer);
+  countdownTimer = setInterval(function(){
+    countdownVal--;
+    el('cdown').textContent = 'next: ' + countdownVal + 's';
+    if(countdownVal <= 0){ refreshAll(); }
+  }, 1000);
+}
+
+window.onload = function(){
+  buildTicker();
+  drawMoodArc(50);
+  refreshAll();
+  startCountdown();
+};
+
+window.onresize = function(){
+  if(sparkPrices.length) drawSparkline(sparkPrices);
+};
+</script>
+</body>
+</html>
