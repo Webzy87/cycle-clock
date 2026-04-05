@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CYCLE CLOCK · Bitcoin Intelligence</title>
+<title>CYCLE INTELLIGENCE PANEL · Bitcoin Market Intelligence</title>
 <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -172,6 +172,107 @@ input[type=range]{width:100%;accent-color:var(--gold);height:3px;background:var(
 /* TOOLTIP */
 .has-tip{position:relative;cursor:help;border-bottom:1px dashed rgba(200,168,75,0.3)}
 .has-tip:hover::after{content:attr(data-tip);position:absolute;bottom:100%;left:0;background:var(--card);border:1px solid var(--border);padding:8px 12px;font-size:10px;color:var(--text);white-space:nowrap;z-index:50;margin-bottom:6px;line-height:1.6;font-style:normal;max-width:280px;white-space:normal;font-family:var(--mono);letter-spacing:0.05em}
+
+/* ── INTELLIGENCE SECTION DIVIDER ── */
+.intel-divider{margin:2.5rem 0 1.5rem;display:flex;align-items:center;gap:1.25rem}
+.intel-divider-label{font-family:var(--serif);font-size:1.1rem;font-weight:400;color:var(--gold);letter-spacing:0.08em;white-space:nowrap}
+.intel-divider-line{flex:1;height:1px;background:linear-gradient(90deg,rgba(200,168,75,0.4),transparent)}
+.intel-divider-tag{font-size:8px;letter-spacing:0.35em;color:var(--muted);text-transform:uppercase;white-space:nowrap;padding:4px 10px;border:1px solid var(--border);border-radius:2px}
+
+/* ── SELECTORS (shared) ── */
+.sel-group{display:flex;flex-direction:column;gap:6px;margin-bottom:1rem}
+.sel-label{font-size:8px;letter-spacing:0.3em;color:var(--muted);text-transform:uppercase}
+.sel-btns{display:flex;gap:4px;flex-wrap:wrap}
+.sel-btn{font-family:var(--mono);font-size:9px;letter-spacing:0.15em;text-transform:uppercase;padding:6px 12px;background:transparent;border:1px solid var(--border);color:var(--muted);cursor:pointer;border-radius:2px;transition:all 0.18s;white-space:nowrap}
+.sel-btn:hover{border-color:rgba(200,168,75,0.35);color:var(--text)}
+.sel-btn.active{background:var(--goldfaint);border-color:rgba(200,168,75,0.45);color:var(--gold)}
+.sel-btn.active-green{background:rgba(61,186,126,0.1);border-color:rgba(61,186,126,0.35);color:var(--green)}
+.sel-btn.active-red{background:rgba(224,82,82,0.1);border-color:rgba(224,82,82,0.3);color:var(--red)}
+.sel-btn.active-blue{background:rgba(74,158,255,0.1);border-color:rgba(74,158,255,0.3);color:var(--blue)}
+
+/* ── MODULE 1: PHASE CONFIDENCE ENGINE ── */
+.pce-card{grid-column:1/-1}
+.pce-inner{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:0.25rem}
+.pce-left{}
+.pce-selectors{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.pce-right{border-left:1px solid var(--border);padding-left:2rem;display:flex;flex-direction:column;justify-content:center}
+.pce-phase-out{font-family:var(--serif);font-size:1.8rem;font-weight:400;letter-spacing:0.02em;color:var(--text);line-height:1.1;margin-bottom:0.35rem}
+.pce-conf-row{display:flex;align-items:baseline;gap:0.75rem;margin-bottom:1.25rem}
+.pce-conf-val{font-size:2.4rem;font-weight:500;letter-spacing:-0.03em}
+.pce-conf-label{font-size:9px;letter-spacing:0.3em;color:var(--muted);text-transform:uppercase}
+.pce-conf-bar-wrap{height:5px;background:var(--border);border-radius:3px;margin-bottom:1.25rem}
+.pce-conf-bar{height:100%;border-radius:3px;transition:width 0.6s ease,background 0.4s}
+.pce-expand-btn{font-size:9px;letter-spacing:0.2em;color:var(--gold);background:transparent;border:1px solid rgba(200,168,75,0.25);padding:7px 14px;cursor:pointer;border-radius:2px;text-transform:uppercase;transition:all 0.2s;text-align:left;display:flex;align-items:center;gap:8px;width:fit-content}
+.pce-expand-btn:hover{background:var(--goldfaint)}
+.pce-expand-btn .arrow{transition:transform 0.25s;display:inline-block}
+.pce-expand-btn.open .arrow{transform:rotate(90deg)}
+.pce-breakdown{overflow:hidden;max-height:0;transition:max-height 0.4s ease;margin-top:1rem}
+.pce-breakdown.open{max-height:400px}
+.pce-factor-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--faint)}
+.pce-factor-row:last-child{border-bottom:none}
+.pce-factor-name{font-size:10px;color:var(--muted);letter-spacing:0.08em;flex:1}
+.pce-factor-contrib{font-size:10px;font-weight:500;min-width:50px;text-align:right}
+.pce-factor-bar{width:70px;height:3px;background:var(--border);border-radius:2px;margin:0 10px}
+.pce-factor-fill{height:100%;border-radius:2px;transition:width 0.5s ease}
+@media(max-width:900px){.pce-inner{grid-template-columns:1fr}.pce-right{border-left:none;border-top:1px solid var(--border);padding-left:0;padding-top:1.5rem}.pce-selectors{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.pce-selectors{grid-template-columns:1fr}}
+
+/* ── MODULE 2: DOMINANCE ROTATION ── */
+.dom-card{grid-column:span 2}
+.dom-output-row{display:flex;align-items:center;gap:2rem;margin:1rem 0;flex-wrap:wrap}
+.dom-stat{display:flex;flex-direction:column;gap:4px}
+.dom-stat-label{font-size:8px;letter-spacing:0.3em;color:var(--muted);text-transform:uppercase}
+.dom-stat-val{font-size:1.3rem;font-weight:500;letter-spacing:-0.02em}
+.dom-divider{width:1px;height:40px;background:var(--border);flex-shrink:0}
+.rotation-bar-wrap{margin-top:1rem}
+.rot-label-row{display:flex;justify-content:space-between;margin-bottom:6px}
+.rot-label{font-size:8px;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase;text-align:center;flex:1}
+.rotation-track{display:flex;height:28px;border-radius:3px;overflow:hidden;border:1px solid var(--border)}
+.rot-seg{flex:1;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;transition:all 0.4s;border-right:1px solid rgba(0,0,0,0.3)}
+.rot-seg:last-child{border-right:none}
+.rot-seg.active{flex:2.2}
+.rot-note{font-size:9px;color:var(--muted);margin-top:0.75rem;line-height:1.8;font-family:var(--serif);font-style:italic}
+@media(max-width:600px){.dom-card{grid-column:1}}
+
+/* ── MODULE 3: LIQUIDITY REGIME ── */
+.liq-card{grid-column:span 1}
+.liq-outputs{margin-top:1rem;display:flex;flex-direction:column;gap:0.6rem}
+.liq-out-row{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:3px;border:1px solid var(--border);transition:all 0.3s}
+.liq-out-key{font-size:9px;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase}
+.liq-out-val{font-size:11px;font-weight:500;letter-spacing:0.08em}
+.liq-tooltip-row{margin-top:1rem;padding:10px 12px;background:rgba(74,158,255,0.05);border:1px solid rgba(74,158,255,0.15);border-radius:3px}
+.liq-tooltip-text{font-size:10px;color:var(--muted);line-height:1.7;font-family:var(--serif);font-style:italic}
+
+/* ── MODULE 4: CYCLE COMPARISON ── */
+.comp-card{grid-column:span 2}
+.comp-inner{display:flex;flex-direction:column;gap:1rem;margin-top:0.75rem}
+.comp-row{display:grid;grid-template-columns:160px 1fr auto;align-items:center;gap:1.5rem;padding:0.85rem 1rem;border:1px solid var(--border);border-radius:3px;transition:border-color 0.3s}
+.comp-row:hover{border-color:rgba(200,168,75,0.2)}
+.comp-cycle-name{font-size:10px;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase}
+.comp-track{position:relative;height:6px;background:var(--border);border-radius:3px;flex:1}
+.comp-bar-prev{position:absolute;top:0;left:0;height:100%;border-radius:3px;opacity:0.35;transition:width 0.7s ease}
+.comp-bar-now{position:absolute;top:0;left:0;height:100%;border-radius:3px;transition:width 0.7s ease}
+.comp-needle{position:absolute;top:-4px;width:2px;height:14px;background:var(--gold);border-radius:1px;transition:left 0.7s ease}
+.comp-badge{font-size:9px;letter-spacing:0.15em;padding:5px 12px;border-radius:2px;text-transform:uppercase;white-space:nowrap;font-weight:500}
+.comp-badge.ahead{background:rgba(61,186,126,0.12);color:var(--green);border:1px solid rgba(61,186,126,0.25)}
+.comp-badge.aligned{background:rgba(200,168,75,0.1);color:var(--gold);border:1px solid rgba(200,168,75,0.25)}
+.comp-badge.behind{background:rgba(224,82,82,0.1);color:var(--red);border:1px solid rgba(224,82,82,0.2)}
+.comp-detail{font-size:9px;color:var(--muted);margin-top:0.4rem;letter-spacing:0.08em}
+.comp-months-label{display:flex;justify-content:space-between;font-size:8px;color:var(--muted);margin-top:5px;letter-spacing:0.08em}
+@media(max-width:600px){.comp-card{grid-column:1}.comp-row{grid-template-columns:1fr auto;gap:0.75rem}.comp-track{display:none}}
+
+/* INTEL GRID RESPONSIVE */
+@media(max-width:900px){
+  #intel-grid{grid-template-columns:1fr 1fr}
+  .pce-card{grid-column:1/-1}
+  .dom-card{grid-column:1/-1}
+  .liq-card{grid-column:1}
+  .comp-card{grid-column:2}
+}
+@media(max-width:600px){
+  #intel-grid{grid-template-columns:1fr}
+  .pce-card,.dom-card,.liq-card,.comp-card{grid-column:1}
+}
 </style>
 </head>
 <body>
@@ -180,8 +281,8 @@ input[type=range]{width:100%;accent-color:var(--gold);height:3px;background:var(
   <!-- TOPBAR -->
   <div class="topbar">
     <div class="brand">
-      <div class="brand-mark">Cycle Clock</div>
-      <div class="brand-sub">Bitcoin Market Intelligence</div>
+      <div class="brand-mark">Cycle Intelligence Panel</div>
+      <div class="brand-sub">Bitcoin Market Intelligence · v2</div>
     </div>
     <div class="topbar-right">
       <div class="halving-chip" id="halving-chip">Next halving: calculating…</div>
@@ -341,6 +442,146 @@ input[type=range]{width:100%;accent-color:var(--gold);height:3px;background:var(
     </div>
 
   </div><!-- /main-grid -->
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- CYCLE INTELLIGENCE SIGNALS SECTION        -->
+  <!-- ══════════════════════════════════════════ -->
+  <div class="intel-divider">
+    <div class="intel-divider-label">Cycle Intelligence Signals</div>
+    <div class="intel-divider-line"></div>
+    <div class="intel-divider-tag">Interactive · Live Calculation</div>
+  </div>
+
+  <div class="main-grid" id="intel-grid">
+
+    <!-- ░░ MODULE 1: PHASE CONFIDENCE ENGINE ░░ -->
+    <div class="card pce-card">
+      <div class="card-label">Phase Confidence Engine</div>
+      <div class="pce-inner">
+        <div class="pce-left">
+          <div class="pce-selectors">
+            <div class="sel-group">
+              <div class="sel-label">Months since halving</div>
+              <div class="sel-btns" id="pce-months-btns">
+                <button class="sel-btn" data-val="3" onclick="pceSelect('months',3,this)">0–6</button>
+                <button class="sel-btn" data-val="9" onclick="pceSelect('months',9,this)">6–12</button>
+                <button class="sel-btn active" data-val="15" onclick="pceSelect('months',15,this)">12–18</button>
+                <button class="sel-btn" data-val="21" onclick="pceSelect('months',21,this)">18–24</button>
+                <button class="sel-btn" data-val="30" onclick="pceSelect('months',30,this)">24–36</button>
+                <button class="sel-btn" data-val="42" onclick="pceSelect('months',42,this)">36–48</button>
+              </div>
+            </div>
+            <div class="sel-group">
+              <div class="sel-label">BTC dominance trend</div>
+              <div class="sel-btns" id="pce-dom-btns">
+                <button class="sel-btn active" data-val="rising" onclick="pceSelect('dom','rising',this)">Rising</button>
+                <button class="sel-btn" data-val="sideways" onclick="pceSelect('dom','sideways',this)">Sideways</button>
+                <button class="sel-btn" data-val="falling" onclick="pceSelect('dom','falling',this)">Falling</button>
+              </div>
+            </div>
+            <div class="sel-group">
+              <div class="sel-label">Volatility regime</div>
+              <div class="sel-btns" id="pce-vol-btns">
+                <button class="sel-btn" data-val="expanding" onclick="pceSelect('vol','expanding',this)">Expanding</button>
+                <button class="sel-btn active" data-val="neutral" onclick="pceSelect('vol','neutral',this)">Neutral</button>
+                <button class="sel-btn" data-val="compressing" onclick="pceSelect('vol','compressing',this)">Compressing</button>
+              </div>
+            </div>
+            <div class="sel-group">
+              <div class="sel-label">Market sentiment</div>
+              <div class="sel-btns" id="pce-sent-btns">
+                <button class="sel-btn" data-val="fear" onclick="pceSelect('sent','fear',this)">Fear</button>
+                <button class="sel-btn active" data-val="neutral" onclick="pceSelect('sent','neutral',this)">Neutral</button>
+                <button class="sel-btn" data-val="greed" onclick="pceSelect('sent','greed',this)">Greed</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="pce-right">
+          <div class="pce-phase-out" id="pce-phase-out">Early Bull Market</div>
+          <div class="pce-conf-row">
+            <div class="pce-conf-val" id="pce-conf-val" style="color:var(--gold)">—%</div>
+            <div class="pce-conf-label">Confidence</div>
+          </div>
+          <div class="pce-conf-bar-wrap">
+            <div class="pce-conf-bar" id="pce-conf-bar" style="width:0%;background:var(--gold)"></div>
+          </div>
+          <button class="pce-expand-btn" id="pce-expand-btn" onclick="togglePCEBreakdown()">
+            <span class="arrow">▶</span> Explain Confidence
+          </button>
+          <div class="pce-breakdown" id="pce-breakdown">
+            <div id="pce-factors-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ░░ MODULE 2: BTC DOMINANCE ROTATION ░░ -->
+    <div class="card dom-card">
+      <div class="card-label">BTC Dominance · Capital Rotation</div>
+      <div class="sel-group" style="margin-bottom:0.5rem">
+        <div class="sel-label">BTC dominance trend</div>
+        <div class="sel-btns" id="dom-trend-btns">
+          <button class="sel-btn active" data-val="rising" onclick="domSelect('rising',this)">Rising</button>
+          <button class="sel-btn" data-val="sideways" onclick="domSelect('sideways',this)">Sideways</button>
+          <button class="sel-btn" data-val="falling" onclick="domSelect('falling',this)">Falling</button>
+        </div>
+      </div>
+      <div class="dom-output-row">
+        <div class="dom-stat">
+          <div class="dom-stat-label">Dominance trend</div>
+          <div class="dom-stat-val" id="dom-trend-out" style="color:var(--green)">Rising</div>
+        </div>
+        <div class="dom-divider"></div>
+        <div class="dom-stat">
+          <div class="dom-stat-label">Altseason probability</div>
+          <div class="dom-stat-val" id="dom-alt-prob" style="color:var(--red)">Low</div>
+        </div>
+        <div class="dom-divider"></div>
+        <div class="dom-stat">
+          <div class="dom-stat-label">Rotation signal</div>
+          <div class="dom-stat-val" id="dom-rotation-sig" style="color:var(--gold)">BTC Accumulate</div>
+        </div>
+      </div>
+      <div class="rotation-bar-wrap">
+        <div class="rot-label-row">
+          <div class="rot-label">BTC</div>
+          <div class="rot-label">ETH</div>
+          <div class="rot-label">Large Cap</div>
+          <div class="rot-label">Mid Cap</div>
+          <div class="rot-label">Small Cap</div>
+        </div>
+        <div class="rotation-track" id="rotation-track"></div>
+        <div class="comp-months-label" style="margin-top:6px"><span>Capital enters here first →</span><span>→ then flows outward</span></div>
+      </div>
+      <div class="rot-note" id="rot-note">BTC dominance rising typically indicates capital is consolidating in Bitcoin before broader market expansion begins.</div>
+    </div>
+
+    <!-- ░░ MODULE 3: LIQUIDITY REGIME ░░ -->
+    <div class="card liq-card">
+      <div class="card-label">Global Liquidity Regime</div>
+      <div class="sel-group">
+        <div class="sel-label">Global liquidity state</div>
+        <div class="sel-btns" id="liq-btns">
+          <button class="sel-btn active-red" data-val="contracting" onclick="liqSelect('contracting',this)">Contracting</button>
+          <button class="sel-btn" data-val="neutral" onclick="liqSelect('neutral',this)">Neutral</button>
+          <button class="sel-btn active active-green" data-val="expanding" onclick="liqSelect('expanding',this)">Expanding</button>
+        </div>
+      </div>
+      <div class="liq-outputs" id="liq-outputs"></div>
+      <div class="liq-tooltip-row">
+        <div class="liq-tooltip-text" id="liq-tooltip-text">When central banks expand liquidity — QE, rate cuts, M2 growth — risk assets including crypto benefit directly. BTC historically leads the move, followed by alts 2–4 months later.</div>
+      </div>
+    </div>
+
+    <!-- ░░ MODULE 4: HISTORICAL CYCLE COMPARISON ░░ -->
+    <div class="card comp-card">
+      <div class="card-label">Historical Cycle Comparison Overlay</div>
+      <div class="comp-inner" id="comp-inner"></div>
+      <div style="font-size:9px;color:var(--muted);margin-top:1rem;line-height:1.8;letter-spacing:0.06em">Bars show historical cycle trajectory. Gold needle marks current equivalent position. Comparison uses months-since-halving as baseline. <span style="color:var(--gold)">Ahead</span> = current cycle outpacing historical equivalent. <span style="color:var(--muted)">Aligned</span> = within ±1 month. <span style="color:var(--red)">Behind</span> = lagging historical pace.</div>
+    </div>
+
+  </div><!-- /intel-grid -->
 
   <!-- WISDOM BAR -->
   <div class="wisdom-bar" id="wisdom-bar">
@@ -694,6 +935,360 @@ setWisdom();
 setTimeout(()=>{
   document.querySelectorAll('.signal-bar-fill').forEach(b=>{const w=b.style.width;b.style.width='0';setTimeout(()=>{b.style.width=w;b.style.transition='width 1s ease'},50)});
 },300);
+
+// ══════════════════════════════════════════
+// MODULE 1 · PHASE CONFIDENCE ENGINE
+// ══════════════════════════════════════════
+const PCE_STATE = { months: 15, dom: 'rising', vol: 'neutral', sent: 'neutral' };
+
+// Phase scoring matrix
+// Each combo of inputs scores a likelihood for each of 5 phases
+// Returns {phase, confidence, factors[]}
+function calcPhaseConfidence(){
+  const {months, dom, vol, sent} = PCE_STATE;
+  // Base phase from months
+  const monthPhase =
+    months<=6  ? 0 :   // Post-Halving Accumulation
+    months<=12 ? 0 :
+    months<=20 ? 1 :   // Early Bull
+    months<=28 ? 1 :
+    months<=36 ? 2 :   // Euphoria/Distribution
+    months<=42 ? 3 :   // Bear Onset
+                 4;    // Deep Accumulation
+
+  const phaseNames = ['Post-Halving Accumulation','Early Bull Market','Euphoria & Distribution','Bear Market Onset','Deep Accumulation'];
+  const phaseColors = ['#3dba7e','#c8a84b','#e05252','#9b7fe8','#4a9eff'];
+
+  // Factor contributions (each adds/subtracts from base 50%)
+  const factors = [];
+  let score = 50;
+
+  // FACTOR 1: Time placement
+  const timeScore = Math.max(0, 30 - Math.abs(months - [3,15,30,40,46][monthPhase])*2);
+  score += timeScore;
+  factors.push({
+    name: 'Time placement (months since halving)',
+    contrib: timeScore,
+    color: timeScore>15?'var(--green)':timeScore>8?'var(--gold)':'var(--red)',
+    note: `${months} months post-halving aligns ${timeScore>15?'strongly':'moderately'} with ${phaseNames[monthPhase]}`
+  });
+
+  // FACTOR 2: BTC Dominance
+  const domMap = {
+    0: {rising:15, sideways:5, falling:-10},
+    1: {rising:12, sideways:8, falling:0},
+    2: {rising:-5, sideways:5, falling:12},
+    3: {rising:5, sideways:8, falling:3},
+    4: {rising:10, sideways:5, falling:-8}
+  };
+  const domScore = domMap[monthPhase][dom];
+  score += domScore;
+  const domLabels = {rising:'BTC dominance rising = capital in BTC = early/mid cycle signal', sideways:'Sideways dominance = transition zone', falling:'Falling dominance = capital rotating to alts = late cycle signal'};
+  factors.push({
+    name: 'BTC dominance direction',
+    contrib: domScore,
+    color: domScore>8?'var(--green)':domScore>0?'var(--gold)':'var(--red)',
+    note: domLabels[dom]
+  });
+
+  // FACTOR 3: Volatility regime
+  const volMap = {
+    0: {expanding:-5, neutral:10, compressing:15},
+    1: {expanding:12, neutral:8, compressing:-5},
+    2: {expanding:15, neutral:5, compressing:-8},
+    3: {expanding:10, neutral:6, compressing:3},
+    4: {expanding:-8, neutral:8, compressing:12}
+  };
+  const volScore = volMap[monthPhase][vol];
+  score += volScore;
+  const volLabels = {expanding:'Expanding volatility signals active price discovery — consistent with bull/bear transitions', neutral:'Neutral volatility = consolidation phase', compressing:'Compressing volatility = coiling before major move — consistent with accumulation'};
+  factors.push({
+    name: 'Volatility regime',
+    contrib: volScore,
+    color: volScore>8?'var(--green)':volScore>0?'var(--gold)':'var(--red)',
+    note: volLabels[vol]
+  });
+
+  // FACTOR 4: Sentiment
+  const sentMap = {
+    0: {fear:15, neutral:8, greed:-12},
+    1: {fear:-5, neutral:10, greed:8},
+    2: {fear:-10, neutral:2, greed:15},
+    3: {fear:12, neutral:6, greed:-8},
+    4: {fear:10, neutral:8, greed:-15}
+  };
+  const sentScore = sentMap[monthPhase][sent];
+  score += sentScore;
+  const sentLabels = {fear:'Fear sentiment during early cycle = historically optimal accumulation signal', neutral:'Neutral sentiment = transitional — neither peak nor trough', greed:'Greed sentiment in late phases = distribution zone warning'};
+  factors.push({
+    name: 'Market sentiment',
+    contrib: sentScore,
+    color: sentScore>8?'var(--green)':sentScore>0?'var(--gold)':'var(--red)',
+    note: sentLabels[sent]
+  });
+
+  const confidence = Math.min(95, Math.max(18, score));
+  return {phase: phaseNames[monthPhase], color: phaseColors[monthPhase], confidence, factors};
+}
+
+function renderPCE(){
+  const {phase, color, confidence, factors} = calcPhaseConfidence();
+  document.getElementById('pce-phase-out').textContent = phase;
+  document.getElementById('pce-phase-out').style.color = color;
+  document.getElementById('pce-conf-val').textContent = confidence+'%';
+  document.getElementById('pce-conf-val').style.color =
+    confidence>=70?'var(--green)':confidence>=50?'var(--gold)':'var(--red)';
+  const bar = document.getElementById('pce-conf-bar');
+  bar.style.width = confidence+'%';
+  bar.style.background = confidence>=70?'var(--green)':confidence>=50?'var(--gold)':'var(--red)';
+  // Factors breakdown
+  document.getElementById('pce-factors-list').innerHTML = factors.map(f=>`
+    <div class="pce-factor-row">
+      <div>
+        <div class="pce-factor-name">${f.name}</div>
+        <div style="font-size:9px;color:var(--muted);margin-top:2px;line-height:1.5">${f.note}</div>
+      </div>
+      <div class="pce-factor-bar"><div class="pce-factor-fill" style="width:${Math.min(100,Math.max(0,f.contrib/30*100))}%;background:${f.color}"></div></div>
+      <div class="pce-factor-contrib" style="color:${f.color}">${f.contrib>0?'+':''}${f.contrib}</div>
+    </div>`).join('');
+}
+
+function pceSelect(key, val, btn){
+  PCE_STATE[key] = val;
+  // Update button states for this group
+  const groupMap = {months:'pce-months-btns', dom:'pce-dom-btns', vol:'pce-vol-btns', sent:'pce-sent-btns'};
+  document.querySelectorAll('#'+groupMap[key]+' .sel-btn').forEach(b=>b.classList.remove('active','active-green','active-red','active-blue'));
+  btn.classList.add('active');
+  renderPCE();
+}
+
+function togglePCEBreakdown(){
+  const btn = document.getElementById('pce-expand-btn');
+  const panel = document.getElementById('pce-breakdown');
+  btn.classList.toggle('open');
+  panel.classList.toggle('open');
+}
+
+// ══════════════════════════════════════════
+// MODULE 2 · BTC DOMINANCE ROTATION
+// ══════════════════════════════════════════
+const DOM_DATA = {
+  rising: {
+    trendLabel:'Rising', trendColor:'var(--green)',
+    altProb:'Low', altProbColor:'var(--red)',
+    rotSig:'BTC Accumulate', rotSigColor:'var(--gold)',
+    activeZone: 0, // BTC
+    note:'BTC dominance rising = capital is consolidating in Bitcoin. Altcoins underperform. This is typically early-to-mid cycle. Wait for dominance to peak and roll over before rotating into alts.',
+    segData:[
+      {label:'BTC',    bg:'rgba(200,168,75,0.55)',  textCol:'#e8c96a'},
+      {label:'ETH',    bg:'rgba(200,168,75,0.12)',  textCol:'#6b7a8d'},
+      {label:'LG CAP', bg:'rgba(200,168,75,0.08)',  textCol:'#6b7a8d'},
+      {label:'MID',    bg:'rgba(200,168,75,0.05)',  textCol:'#6b7a8d'},
+      {label:'SMALL',  bg:'rgba(200,168,75,0.03)',  textCol:'#6b7a8d'},
+    ]
+  },
+  sideways: {
+    trendLabel:'Sideways', trendColor:'var(--gold)',
+    altProb:'Medium', altProbColor:'var(--gold)',
+    rotSig:'Transition Zone', rotSigColor:'var(--gold)',
+    activeZone: 1,
+    note:'Sideways BTC dominance = a transition is forming. Capital begins flowing from BTC into ETH and large-cap alts. This zone can last weeks to months before clear rotation direction emerges.',
+    segData:[
+      {label:'BTC',    bg:'rgba(200,168,75,0.25)',  textCol:'#6b7a8d'},
+      {label:'ETH',    bg:'rgba(200,168,75,0.5)',   textCol:'#e8c96a'},
+      {label:'LG CAP', bg:'rgba(74,158,255,0.25)',  textCol:'#6b7a8d'},
+      {label:'MID',    bg:'rgba(74,158,255,0.1)',   textCol:'#6b7a8d'},
+      {label:'SMALL',  bg:'rgba(74,158,255,0.05)',  textCol:'#6b7a8d'},
+    ]
+  },
+  falling: {
+    trendLabel:'Falling', trendColor:'var(--red)',
+    altProb:'High', altProbColor:'var(--green)',
+    rotSig:'Altseason Active', rotSigColor:'var(--green)',
+    activeZone: 2,
+    note:'Falling BTC dominance = altseason is underway or imminent. Capital has rotated from BTC into ETH, large caps, then progressively smaller caps. Late-cycle dynamics. Risk management becomes critical.',
+    segData:[
+      {label:'BTC',    bg:'rgba(224,82,82,0.15)',   textCol:'#6b7a8d'},
+      {label:'ETH',    bg:'rgba(61,186,126,0.3)',   textCol:'#6b7a8d'},
+      {label:'LG CAP', bg:'rgba(61,186,126,0.55)',  textCol:'#3dba7e'},
+      {label:'MID',    bg:'rgba(74,158,255,0.45)',  textCol:'#4a9eff'},
+      {label:'SMALL',  bg:'rgba(155,127,232,0.35)', textCol:'#9b7fe8'},
+    ]
+  }
+};
+
+let currentDom = 'rising';
+function domSelect(val, btn){
+  currentDom = val;
+  document.querySelectorAll('#dom-trend-btns .sel-btn').forEach(b=>b.classList.remove('active','active-green','active-red'));
+  btn.classList.add(val==='falling'?'active active-red':val==='sideways'?'active':'active active-green');
+  renderDom();
+}
+
+function renderDom(){
+  const d = DOM_DATA[currentDom];
+  document.getElementById('dom-trend-out').textContent = d.trendLabel;
+  document.getElementById('dom-trend-out').style.color = d.trendColor;
+  document.getElementById('dom-alt-prob').textContent = d.altProb;
+  document.getElementById('dom-alt-prob').style.color = d.altProbColor;
+  document.getElementById('dom-rotation-sig').textContent = d.rotSig;
+  document.getElementById('dom-rotation-sig').style.color = d.rotSigColor;
+  document.getElementById('rot-note').textContent = d.note;
+  const track = document.getElementById('rotation-track');
+  track.innerHTML = d.segData.map((s,i)=>`
+    <div class="rot-seg${i===d.activeZone?' active':''}" style="background:${s.bg};color:${s.textCol}">${s.label}</div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════
+// MODULE 3 · LIQUIDITY REGIME
+// ══════════════════════════════════════════
+const LIQ_DATA = {
+  contracting:{
+    outputs:[
+      {key:'Risk Appetite',    val:'Decreasing',  col:'var(--red)'},
+      {key:'Cycle Momentum',   val:'Weakening',   col:'var(--red)'},
+      {key:'Altcoin Bias',     val:'Negative',    col:'var(--red)'},
+      {key:'BTC Correlation',  val:'High',        col:'var(--gold)'},
+      {key:'Suggested Stance', val:'Risk-Off / Hold',col:'var(--muted)'},
+    ],
+    tipText:'Contracting liquidity (M2 shrinking, rates rising, QT active) historically compresses crypto valuations. BTC holds better than alts but all assets reprice downward. This is not a cycle-friendly environment — patience is the strategy.',
+    bg:'rgba(224,82,82,0.04)',border:'rgba(224,82,82,0.15)'
+  },
+  neutral:{
+    outputs:[
+      {key:'Risk Appetite',    val:'Stable',      col:'var(--gold)'},
+      {key:'Cycle Momentum',   val:'Holding',     col:'var(--gold)'},
+      {key:'Altcoin Bias',     val:'Selective',   col:'var(--gold)'},
+      {key:'BTC Correlation',  val:'Moderate',    col:'var(--gold)'},
+      {key:'Suggested Stance', val:'Monitor / Accumulate',col:'var(--gold)'},
+    ],
+    tipText:'Neutral liquidity = no strong macro tailwind or headwind. Crypto trades on its own fundamentals and cycle timing. A neutral macro environment during a bull cycle phase is actually a strong setup.',
+    bg:'rgba(200,168,75,0.04)',border:'rgba(200,168,75,0.15)'
+  },
+  expanding:{
+    outputs:[
+      {key:'Risk Appetite',    val:'Increasing',  col:'var(--green)'},
+      {key:'Cycle Momentum',   val:'Accelerating',col:'var(--green)'},
+      {key:'Altcoin Bias',     val:'Positive',    col:'var(--green)'},
+      {key:'BTC Correlation',  val:'Reducing',    col:'var(--gold)'},
+      {key:'Suggested Stance', val:'Risk-On / DCA',col:'var(--green)'},
+    ],
+    tipText:'Expanding liquidity (M2 growing, rate cuts, QE) is the most historically reliable macro tailwind for crypto. When the halving cycle aligns with expanding global liquidity, the result has been the strongest bull markets on record.',
+    bg:'rgba(61,186,126,0.04)',border:'rgba(61,186,126,0.15)'
+  }
+};
+
+let currentLiq = 'expanding';
+function liqSelect(val, btn){
+  currentLiq = val;
+  document.querySelectorAll('#liq-btns .sel-btn').forEach(b=>b.classList.remove('active','active-green','active-red'));
+  btn.classList.add(val==='expanding'?'active active-green':val==='contracting'?'active active-red':'active');
+  renderLiq();
+}
+
+function renderLiq(){
+  const d = LIQ_DATA[currentLiq];
+  const out = document.getElementById('liq-outputs');
+  out.innerHTML = d.outputs.map(o=>`
+    <div class="liq-out-row" style="background:${LIQ_DATA[currentLiq].bg};border-color:${LIQ_DATA[currentLiq].border}">
+      <div class="liq-out-key">${o.key}</div>
+      <div class="liq-out-val" style="color:${o.col}">${o.val}</div>
+    </div>`).join('');
+  document.getElementById('liq-tooltip-text').textContent = d.tipText;
+}
+
+// ══════════════════════════════════════════
+// MODULE 4 · HISTORICAL CYCLE COMPARISON
+// ══════════════════════════════════════════
+// Historical cycle data: months since halving vs approximate price performance index
+// 2017 cycle (halving July 2016), 2021 cycle (halving May 2020)
+const HIST_CYCLES = [
+  {
+    label: '2017 Cycle',
+    halvingDate: new Date('2016-07-09'),
+    peakMonth: 17,   // Dec 2017 ~17 months post-halving
+    peakMultiple: 120,
+    color: '#9b7fe8',
+    desc: 'The 2017 cycle peaked ~17 months post-halving. Retail-driven. Extreme alt euphoria. ICO mania at peak.'
+  },
+  {
+    label: '2021 Cycle',
+    halvingDate: new Date('2020-05-11'),
+    peakMonth: 18,   // Nov 2021 ~18 months post-halving
+    peakMultiple: 75,
+    color: '#4a9eff',
+    desc: 'The 2021 cycle had a double peak (~13mo & ~18mo). Institutional entry. DeFi/NFT narrative driven.'
+  }
+];
+
+function buildCycleComparison(){
+  const {elapsed} = getCycleProgress();
+  const currentMonths = elapsed / 30.44;
+  const container = document.getElementById('comp-inner');
+  container.innerHTML = HIST_CYCLES.map(c=>{
+    const histMonths = (new Date() - c.halvingDate) / (1000*60*60*24*30.44);
+    // Compare where we are now vs where the historical cycle was at same calendar point
+    // Current cycle: currentMonths since Apr 2024 halving
+    // For comparison: historical cycle was at histMonths since its halving at same point in time
+    // But we compare "at this many months post-halving, what was historical doing"
+    // Key comparison: current = currentMonths, historical at same months = how far through their cycle
+    const diff = currentMonths - histMonths; // positive = we had more time since our halving vs them
+    // Actually better: compare current cycle months against historical cycle months at same elapsed time
+    // The meaningful metric: current months post-halving vs historical peak
+    const pctOfHistPeak = Math.min(1, currentMonths / c.peakMonth);
+    const histPctNow = Math.min(1, histMonths / c.peakMonth);
+    // Delta in months from historical equivalent position
+    const monthDelta = currentMonths - (histMonths % (c.peakMonth * 1.8));
+    const absDelta = Math.abs(monthDelta);
+    let badge, badgeClass, deltaText;
+    if(absDelta <= 1.5){
+      badge = 'Aligned'; badgeClass = 'aligned';
+      deltaText = 'Within ±1 month of historical equivalent position';
+    } else if(monthDelta > 0){
+      badge = `+${absDelta.toFixed(1)}mo ahead`; badgeClass = 'ahead';
+      deltaText = `Current cycle is ${absDelta.toFixed(1)} months ahead of ${c.label} pace`;
+    } else {
+      badge = `${absDelta.toFixed(1)}mo behind`; badgeClass = 'behind';
+      deltaText = `Current cycle is ${absDelta.toFixed(1)} months behind ${c.label} pace`;
+    }
+    const nowPct = Math.min(98, Math.round(pctOfHistPeak*100));
+    const maxMonth = c.peakMonth * 1.5;
+    const currentBarPct = Math.min(95, Math.round((currentMonths/maxMonth)*100));
+    const histBarPct = Math.min(95, Math.round((histMonths/maxMonth)*100));
+    return `<div class="comp-row">
+      <div>
+        <div class="comp-cycle-name">Current vs ${c.label}</div>
+        <div class="comp-detail">${deltaText}</div>
+        <div class="comp-detail" style="color:${c.color};margin-top:2px">${c.desc}</div>
+      </div>
+      <div>
+        <div class="comp-track">
+          <div class="comp-bar-prev" style="width:${histBarPct}%;background:${c.color}"></div>
+          <div class="comp-bar-now" style="width:${currentBarPct}%;background:var(--gold);opacity:0.7"></div>
+          <div class="comp-needle" style="left:calc(${currentBarPct}% - 1px)"></div>
+        </div>
+        <div class="comp-months-label">
+          <span style="color:${c.color}">▬ ${c.label}</span>
+          <span style="color:var(--gold)">▬ Current cycle</span>
+          <span>Peak: mo.${c.peakMonth}</span>
+        </div>
+      </div>
+      <div><span class="comp-badge ${badgeClass}">${badge}</span></div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+// INTEL MODULE INIT
+// ══════════════════════════════════════════
+renderPCE();
+renderDom();
+renderLiq();
+buildCycleComparison();
+
+// Init liquidity button state
+document.querySelector('#liq-btns .sel-btn[data-val="contracting"]').classList.add('active-red');
 </script>
 </body>
 </html>
