@@ -3,381 +3,697 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>XRP Pulse Monitor</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<title>CYCLE CLOCK · Bitcoin Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  :root{
-    --xrp:#00adef;--xrp2:#005f8a;--bg:#080d14;--panel:#0d1520;--border:#1a2d42;
-    --green:#00e676;--red:#ff3d57;--amber:#ffb300;--muted:#4a6070;--text:#c8dde8;
-  }
-  body{background:var(--bg);color:var(--text);font-family:'Share Tech Mono',monospace;margin:0;padding:0}
-  #xrp-root{background:var(--bg);color:var(--text);padding:12px;min-height:600px}
-  .hdr{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:12px}
-  .hdr-logo{font-family:'Orbitron',sans-serif;font-size:18px;color:var(--xrp);letter-spacing:3px}
-  .hdr-tag{font-size:10px;color:var(--muted)}
-  .live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-right:5px;animation:blink 1.2s infinite}
-  @keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
-  .grid2{display:table;width:100%;border-collapse:separate;border-spacing:8px}
-  .grid2-row{display:table-row}
-  .grid2-cell{display:table-cell;width:50%;vertical-align:top}
-  .card{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:8px}
-  .card-lbl{font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px}
-  .price-val{font-family:'Orbitron',sans-serif;font-size:26px;color:var(--xrp);letter-spacing:1px}
-  .price-chg{font-size:12px;margin-top:3px}
-  .up{color:var(--green)}.dn{color:var(--red)}
-  .stat-row{display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:1px solid #0f1e2e}
-  .stat-lbl{color:var(--muted)}.stat-val{color:var(--text)}
-  canvas{display:block}
-  .mood-wrap{text-align:center;padding:8px 0}
-  .mood-lbl{font-family:'Orbitron',sans-serif;font-size:14px;letter-spacing:2px}
-  .mood-score{font-size:28px;font-weight:700;margin:2px 0}
-  .ticker-box{overflow:hidden;height:26px;position:relative;border-radius:4px;background:#040a10}
-  .ticker-inner{white-space:nowrap;position:absolute;top:0;left:0;animation:scroll-ticker 32s linear infinite}
-  @keyframes scroll-ticker{0%{transform:translateX(100vw)}100%{transform:translateX(-100%)}}
-  .ticker-item{display:inline-block;font-size:11px;padding:5px 18px;border-right:1px solid var(--border)}
-  .t-whale{color:#ffd740}.t-buy{color:var(--green)}.t-sell{color:var(--red)}
-  .signal-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #0f1e2e;font-size:11px}
-  .sig-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-  .s-g{background:var(--green)}.s-r{background:var(--red)}.s-a{background:var(--amber)}.s-m{background:var(--muted)}
-  .sig-name{color:var(--text);flex:1}.sig-val{color:var(--muted);font-size:10px}
-  .pulse-bar{height:4px;border-radius:2px;background:var(--border);overflow:hidden;margin-top:6px}
-  .pulse-fill{height:100%;border-radius:2px;transition:width 1s ease}
-  .sec-ttl{font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)}
-  .mini-stat{display:inline-block;background:#0a1520;border:1px solid var(--border);border-radius:4px;padding:4px 8px;font-size:10px;margin:2px}
-  .mini-val{color:var(--xrp);font-weight:700}
-  .zone-badge{display:inline-block;padding:2px 8px;border-radius:3px;font-size:10px;font-family:'Orbitron',sans-serif;letter-spacing:1px}
-  .z-bull{background:#0a2a1a;color:var(--green);border:1px solid rgba(0,230,118,0.25)}
-  .z-neutral{background:#1a1a0a;color:var(--amber);border:1px solid rgba(255,179,0,0.25)}
-  .z-bear{background:#2a0a10;color:var(--red);border:1px solid rgba(255,61,87,0.25)}
-  .refresh-btn{background:transparent;border:1px solid var(--xrp2);color:var(--xrp);font-family:'Share Tech Mono',monospace;font-size:10px;padding:4px 10px;border-radius:3px;cursor:pointer;letter-spacing:1px}
-  .refresh-btn:hover{background:var(--xrp2)}
-  .cdown{font-size:9px;color:var(--muted);margin-left:8px}
-  .err-note{font-size:9px;color:var(--red);margin-top:4px;display:none}
-  #sparkline-wrap{height:60px;position:relative;margin-bottom:6px}
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#080b0f;--surface:#0d1117;--card:#111820;--border:#1e2a38;
+  --gold:#c8a84b;--gold2:#e8c96a;--goldfaint:rgba(200,168,75,0.08);
+  --green:#3dba7e;--red:#e05252;--blue:#4a9eff;--purple:#9b7fe8;
+  --text:#d4cfc8;--muted:#6b7a8d;--faint:#1e2a38;
+  --mono:'IBM Plex Mono',monospace;--serif:'Libre Baskerville',serif;
+}
+html,body{width:100%;min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--mono);overflow-x:hidden}
+
+/* SCANLINES */
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none;z-index:1000}
+
+/* LAYOUT */
+.shell{max-width:1280px;margin:0 auto;padding:2rem 2rem 4rem}
+
+/* TOP BAR */
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:1.25rem 0 2rem;border-bottom:1px solid var(--border);margin-bottom:2.5rem}
+.brand{display:flex;align-items:baseline;gap:1rem}
+.brand-mark{font-family:var(--serif);font-size:1.4rem;font-weight:700;color:var(--gold);letter-spacing:0.02em}
+.brand-sub{font-size:9px;letter-spacing:0.35em;color:var(--muted);text-transform:uppercase}
+.live-badge{display:flex;align-items:center;gap:8px;font-size:9px;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase}
+.pulse{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(61,186,126,0.4)}50%{opacity:0.7;box-shadow:0 0 0 6px rgba(61,186,126,0)}}
+.topbar-right{display:flex;align-items:center;gap:2rem}
+.halving-chip{font-size:9px;letter-spacing:0.15em;color:var(--gold);background:var(--goldfaint);border:1px solid rgba(200,168,75,0.2);padding:6px 14px;border-radius:2px;text-transform:uppercase}
+#live-time{font-size:10px;color:var(--muted);letter-spacing:0.1em}
+
+/* MAIN GRID */
+.main-grid{display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:auto;gap:1.25rem}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:1.5rem;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(200,168,75,0.3),transparent)}
+.card-label{font-size:8px;letter-spacing:0.4em;color:var(--muted);text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:8px}
+.card-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* CLOCK CARD — full width */
+.clock-card{grid-column:1/-1;display:grid;grid-template-columns:auto 1fr auto;gap:2.5rem;align-items:center;padding:2rem 2.5rem}
+
+/* CYCLE CLOCK SVG */
+#clock-wrap{position:relative;width:240px;height:240px;flex-shrink:0}
+#clock-svg{width:240px;height:240px}
+
+/* PHASE STRIP */
+.phase-strip{flex:1}
+.phase-title{font-family:var(--serif);font-size:2rem;font-weight:400;letter-spacing:0.02em;margin-bottom:0.5rem;line-height:1.1}
+.phase-subtitle{font-size:10px;letter-spacing:0.25em;color:var(--muted);text-transform:uppercase;margin-bottom:1.25rem}
+.phase-desc{font-size:12px;line-height:1.9;color:var(--muted);max-width:460px;font-family:var(--serif);font-style:italic}
+.phase-indicators{display:flex;gap:0.75rem;margin-top:1.25rem;flex-wrap:wrap}
+.pill{font-size:8px;letter-spacing:0.2em;padding:5px 12px;border-radius:2px;text-transform:uppercase}
+.pill.bull{background:rgba(61,186,126,0.12);color:var(--green);border:1px solid rgba(61,186,126,0.2)}
+.pill.bear{background:rgba(224,82,82,0.1);color:var(--red);border:1px solid rgba(224,82,82,0.18)}
+.pill.neutral{background:rgba(200,168,75,0.08);color:var(--gold);border:1px solid rgba(200,168,75,0.2)}
+.pill.caution{background:rgba(155,127,232,0.1);color:var(--purple);border:1px solid rgba(155,127,232,0.2)}
+
+/* RIGHT STATS */
+.clock-stats{display:flex;flex-direction:column;gap:1rem;min-width:160px}
+.cstat{border-left:2px solid var(--border);padding-left:1rem}
+.cstat-label{font-size:8px;letter-spacing:0.3em;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
+.cstat-val{font-size:1.4rem;font-weight:500;color:var(--text);letter-spacing:-0.02em}
+.cstat-val.gold{color:var(--gold)}
+.cstat-val.green{color:var(--green)}
+.cstat-val.red{color:var(--red)}
+.cstat-sub{font-size:9px;color:var(--muted);margin-top:2px}
+
+/* SENTIMENT GAUGE */
+.gauge-wrap{position:relative;display:flex;flex-direction:column;align-items:center;padding-top:0.5rem}
+#gauge-svg{width:100%;max-width:220px}
+.gauge-val{font-family:var(--serif);font-size:2.8rem;font-weight:700;text-align:center;margin-top:-0.5rem;letter-spacing:-0.02em}
+.gauge-label-main{font-size:9px;letter-spacing:0.3em;text-align:center;text-transform:uppercase;margin-top:4px}
+
+/* HALVING TIMELINE */
+.halving-card{grid-column:span 2}
+.timeline-wrap{position:relative;margin-top:0.5rem}
+.tl-row{display:flex;align-items:stretch;gap:0}
+.tl-phase{flex:1;position:relative;padding:0.75rem 0.75rem 0.75rem 1rem;border-right:1px solid var(--border);cursor:pointer;transition:background 0.2s}
+.tl-phase:last-child{border-right:none}
+.tl-phase:hover{background:rgba(255,255,255,0.02)}
+.tl-phase.current{background:var(--goldfaint);border-bottom:2px solid var(--gold)}
+.tl-phase-name{font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.tl-phase.current .tl-phase-name{color:var(--gold)}
+.tl-bar{height:4px;border-radius:2px;margin-bottom:8px;background:var(--border)}
+.tl-bar-fill{height:100%;border-radius:2px;transition:width 0.8s ease}
+.tl-dates{font-size:9px;color:var(--muted);line-height:1.6}
+.tl-return{font-size:11px;font-weight:500;margin-top:4px}
+
+/* DCA CALCULATOR */
+.dca-card{grid-column:1/-1}
+.dca-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;margin-top:0.5rem}
+.input-group{display:flex;flex-direction:column;gap:6px}
+.input-label{font-size:8px;letter-spacing:0.3em;color:var(--muted);text-transform:uppercase}
+.input-field{background:rgba(255,255,255,0.03);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:13px;padding:10px 14px;border-radius:3px;outline:none;transition:border-color 0.2s;width:100%}
+.input-field:focus{border-color:rgba(200,168,75,0.4)}
+.range-wrap{display:flex;flex-direction:column;gap:6px}
+input[type=range]{width:100%;accent-color:var(--gold);height:3px;background:var(--border);border-radius:2px;outline:none;cursor:pointer}
+.range-val{font-size:11px;color:var(--gold);text-align:right;letter-spacing:0.05em}
+.dca-results{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--border)}
+.dca-stat{text-align:center;padding:1rem;background:rgba(255,255,255,0.02);border-radius:3px;border:1px solid var(--border)}
+.dca-stat-label{font-size:8px;letter-spacing:0.3em;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
+.dca-stat-val{font-size:1.5rem;font-weight:500;letter-spacing:-0.02em}
+.dca-insight{margin-top:1.25rem;padding:1rem 1.25rem;background:var(--goldfaint);border:1px solid rgba(200,168,75,0.15);border-radius:3px;font-size:11px;line-height:1.8;color:var(--muted);font-family:var(--serif);font-style:italic}
+.dca-insight span{color:var(--gold);font-style:normal;font-weight:700}
+
+/* FEAR & GREED HISTORY */
+.fg-card{}
+.fg-bars{display:flex;align-items:flex-end;gap:3px;height:80px;margin-top:0.75rem}
+.fg-bar{flex:1;border-radius:2px 2px 0 0;min-height:4px;transition:all 0.3s;cursor:pointer;position:relative}
+.fg-bar:hover::after{content:attr(data-tip);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);padding:4px 8px;font-size:8px;letter-spacing:0.1em;white-space:nowrap;color:var(--text);margin-bottom:4px;z-index:10}
+.fg-labels{display:flex;justify-content:space-between;font-size:8px;color:var(--muted);margin-top:6px;letter-spacing:0.1em}
+
+/* ON-CHAIN SIGNALS */
+.signals-card{}
+.signal-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--faint)}
+.signal-row:last-child{border-bottom:none}
+.signal-name{font-size:10px;color:var(--muted);letter-spacing:0.1em}
+.signal-right{display:flex;align-items:center;gap:10px}
+.signal-bar-track{width:80px;height:3px;background:var(--border);border-radius:2px}
+.signal-bar-fill{height:100%;border-radius:2px;transition:width 1s ease}
+.signal-val{font-size:10px;min-width:36px;text-align:right;font-weight:500}
+.signal-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+
+/* BOTTOM WISDOM */
+.wisdom-bar{margin-top:2rem;padding:1.5rem 2rem;border:1px solid var(--border);border-radius:4px;display:flex;justify-content:space-between;align-items:center;background:var(--card)}
+.wisdom-quote{font-family:var(--serif);font-style:italic;font-size:13px;color:var(--muted);max-width:700px;line-height:1.8}
+.wisdom-source{font-size:8px;letter-spacing:0.3em;color:var(--gold);text-transform:uppercase;white-space:nowrap;margin-left:2rem}
+
+/* NAV TABS */
+.tab-row{display:flex;gap:2px;margin-bottom:2rem}
+.tab{font-size:9px;letter-spacing:0.25em;text-transform:uppercase;padding:8px 20px;cursor:pointer;background:transparent;border:1px solid var(--border);color:var(--muted);transition:all 0.2s;border-radius:2px}
+.tab:hover{color:var(--text);border-color:rgba(255,255,255,0.15)}
+.tab.active{background:var(--goldfaint);color:var(--gold);border-color:rgba(200,168,75,0.3)}
+
+/* CHART */
+.price-chart-wrap{grid-column:1/-1}
+#price-canvas{width:100%;height:180px;display:block}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .main-grid{grid-template-columns:1fr 1fr}
+  .clock-card{grid-template-columns:1fr;text-align:center}
+  .clock-stats{flex-direction:row;flex-wrap:wrap;justify-content:center}
+  .dca-grid{grid-template-columns:1fr 1fr}
+  .dca-results{grid-template-columns:1fr 1fr}
+  .halving-card{grid-column:span 2}
+}
+@media(max-width:600px){
+  .main-grid{grid-template-columns:1fr}
+  .halving-card,.dca-card,.price-chart-wrap{grid-column:span 1}
+  .dca-grid{grid-template-columns:1fr}
+  .dca-results{grid-template-columns:1fr 1fr}
+}
+
+/* ANIMATIONS */
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.card{animation:fadeIn 0.6s ease both}
+.card:nth-child(2){animation-delay:0.05s}.card:nth-child(3){animation-delay:0.1s}
+.card:nth-child(4){animation-delay:0.15s}.card:nth-child(5){animation-delay:0.2s}
+.card:nth-child(6){animation-delay:0.25s}
+
+/* NUMBER COUNTER */
+.counter{display:inline-block}
+
+/* TOOLTIP */
+.has-tip{position:relative;cursor:help;border-bottom:1px dashed rgba(200,168,75,0.3)}
+.has-tip:hover::after{content:attr(data-tip);position:absolute;bottom:100%;left:0;background:var(--card);border:1px solid var(--border);padding:8px 12px;font-size:10px;color:var(--text);white-space:nowrap;z-index:50;margin-bottom:6px;line-height:1.6;font-style:normal;max-width:280px;white-space:normal;font-family:var(--mono);letter-spacing:0.05em}
 </style>
 </head>
 <body>
-<div id="xrp-root">
-  <div class="hdr">
-    <div>
-      <div class="hdr-logo"><span class="live-dot"></span>XRP PULSE</div>
-      <div class="hdr-tag">REAL-TIME SIGNAL MONITOR — RIPPLE / XRP</div>
+<div class="shell">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">Cycle Clock</div>
+      <div class="brand-sub">Bitcoin Market Intelligence</div>
     </div>
-    <div style="text-align:right">
-      <button class="refresh-btn" onclick="refreshAll()">REFRESH</button>
-      <span class="cdown" id="cdown">next: 30s</span>
-      <div class="err-note" id="err-note">API rate limited — try again shortly</div>
+    <div class="topbar-right">
+      <div class="halving-chip" id="halving-chip">Next halving: calculating…</div>
+      <div class="live-badge"><span class="pulse"></span> <span id="live-time"></span></div>
     </div>
   </div>
 
-  <div class="card" style="margin-bottom:8px;padding:0">
-    <div class="ticker-box"><div class="ticker-inner" id="ticker-inner">Loading...</div></div>
-  </div>
+  <!-- MAIN GRID -->
+  <div class="main-grid">
 
-  <div class="grid2">
-    <div class="grid2-row">
-      <div class="grid2-cell">
-        <div class="card">
-          <div class="card-lbl">XRP / USD</div>
-          <div class="price-val" id="price-val">Fetching...</div>
-          <div class="price-chg" id="price-chg">&nbsp;</div>
-          <div style="margin-top:10px">
-            <div class="stat-row"><span class="stat-lbl">24H HIGH</span><span class="stat-val" id="hi">—</span></div>
-            <div class="stat-row"><span class="stat-lbl">24H LOW</span><span class="stat-val" id="lo">—</span></div>
-            <div class="stat-row"><span class="stat-lbl">VOLUME 24H</span><span class="stat-val" id="vol">—</span></div>
-            <div class="stat-row"><span class="stat-lbl">MARKET CAP</span><span class="stat-val" id="mcap">—</span></div>
-            <div class="stat-row"><span class="stat-lbl">RANK</span><span class="stat-val" id="rank">—</span></div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="sec-ttl">sparkline 7d</div>
-          <div id="sparkline-wrap"><canvas id="spark-canvas" height="60"></canvas></div>
-          <div style="font-size:10px;color:var(--muted)">
-            <span id="spark-lo" style="color:var(--red)">—</span>
-            &nbsp;&#8596;&nbsp;
-            <span id="spark-hi" style="color:var(--green)">—</span>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="sec-ttl">zone analysis</div>
-          <div style="margin-bottom:8px" id="zone-wrap"><span class="zone-badge z-neutral">LOADING</span></div>
-          <div class="stat-row"><span class="stat-lbl">SUPPORT S1</span><span class="stat-val" id="s1">—</span></div>
-          <div class="stat-row"><span class="stat-lbl">SUPPORT S2</span><span class="stat-val" id="s2">—</span></div>
-          <div class="stat-row"><span class="stat-lbl">RESIST R1</span><span class="stat-val" id="r1">—</span></div>
-          <div class="stat-row"><span class="stat-lbl">RESIST R2</span><span class="stat-val" id="r2">—</span></div>
-        </div>
+    <!-- ░░ CLOCK CARD ░░ -->
+    <div class="card clock-card">
+      <div id="clock-wrap">
+        <svg id="clock-svg" viewBox="0 0 240 240">
+          <defs>
+            <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <!-- Rings -->
+          <circle cx="120" cy="120" r="108" fill="none" stroke="#1e2a38" stroke-width="1"/>
+          <circle cx="120" cy="120" r="90" fill="none" stroke="#1e2a38" stroke-width="0.5"/>
+          <!-- Phase arcs -->
+          <g id="phase-arcs"></g>
+          <!-- Progress arc -->
+          <circle id="progress-arc" cx="120" cy="120" r="100" fill="none" stroke="url(#prog-grad)" stroke-width="3" stroke-linecap="round" transform="rotate(-90 120 120)" stroke-dasharray="628" stroke-dashoffset="628"/>
+          <defs>
+            <linearGradient id="prog-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#c8a84b"/>
+              <stop offset="100%" style="stop-color:#e8c96a"/>
+            </linearGradient>
+          </defs>
+          <!-- Tick marks -->
+          <g id="ticks"></g>
+          <!-- Centre -->
+          <circle cx="120" cy="120" r="60" fill="#0d1117"/>
+          <text x="120" y="108" text-anchor="middle" font-family="'Libre Baskerville'" font-size="10" fill="#6b7a8d" letter-spacing="3">DAY</text>
+          <text id="cycle-day" x="120" y="136" text-anchor="middle" font-family="'Libre Baskerville'" font-size="28" font-weight="700" fill="#c8a84b">—</text>
+          <text id="cycle-of" x="120" y="152" text-anchor="middle" font-family="'IBM Plex Mono'" font-size="8" fill="#6b7a8d" letter-spacing="1">of 1458</text>
+          <!-- Hand -->
+          <line id="clock-hand" x1="120" y1="120" x2="120" y2="28" stroke="#c8a84b" stroke-width="1.5" stroke-linecap="round" filter="url(#glow)"/>
+          <circle cx="120" cy="120" r="4" fill="#c8a84b"/>
+        </svg>
       </div>
 
-      <div class="grid2-cell">
-        <div class="card">
-          <div class="sec-ttl">fear / greed meter</div>
-          <div class="mood-wrap">
-            <canvas id="mood-canvas" width="140" height="70" style="display:block;margin:0 auto 6px"></canvas>
-            <div class="mood-lbl" id="mood-label">LOADING</div>
-            <div class="mood-score" id="mood-score">—</div>
-            <div style="font-size:9px;color:var(--muted);margin-top:2px">CRYPTO MARKET INDEX</div>
-          </div>
-        </div>
+      <div class="phase-strip">
+        <div class="card-label">Current cycle phase</div>
+        <div class="phase-title" id="phase-name">Loading…</div>
+        <div class="phase-subtitle" id="phase-subtitle">Bitcoin 4-Year Cycle</div>
+        <div class="phase-desc" id="phase-desc">Calculating current position in the halving cycle…</div>
+        <div class="phase-indicators" id="phase-pills"></div>
+      </div>
 
-        <div class="card">
-          <div class="sec-ttl">signal panel</div>
-          <div id="signals-wrap">
-            <div class="signal-row"><div class="sig-dot s-m"></div><span class="sig-name">Awaiting data...</span></div>
-          </div>
+      <div class="clock-stats">
+        <div class="cstat">
+          <div class="cstat-label">Cycle progress</div>
+          <div class="cstat-val gold" id="cycle-pct">—</div>
+          <div class="cstat-sub">of 4-year cycle</div>
         </div>
-
-        <div class="card">
-          <div class="sec-ttl">on-chain pulse</div>
-          <div class="stat-row"><span class="stat-lbl">TXN COUNT 24H</span><span class="stat-val" id="txn">—</span></div>
-          <div class="stat-row"><span class="stat-lbl">AVG FEE (XRP)</span><span class="stat-val" id="fee">—</span></div>
-          <div class="stat-row"><span class="stat-lbl">LEDGER SPEED</span><span class="stat-val" id="ledger">—</span></div>
-          <div class="stat-row"><span class="stat-lbl">ESCROW LOCKED</span><span class="stat-val" id="escrow">—</span></div>
-          <div style="margin-top:10px">
-            <div style="font-size:9px;color:var(--muted);margin-bottom:3px">BUY/SELL PRESSURE</div>
-            <div class="pulse-bar"><div class="pulse-fill" id="pressure-fill" style="width:50%;background:var(--amber)"></div></div>
-            <div style="display:flex;justify-content:space-between;font-size:9px;margin-top:2px">
-              <span style="color:var(--green)">BUY</span><span style="color:var(--red)">SELL</span>
-            </div>
-          </div>
+        <div class="cstat">
+          <div class="cstat-label">Days since halving</div>
+          <div class="cstat-val" id="days-since">—</div>
+          <div class="cstat-sub">Apr 19 2024</div>
         </div>
-
-        <div class="card">
-          <div class="sec-ttl">quick facts</div>
-          <span class="mini-stat">SUPPLY <span class="mini-val">100B XRP</span></span>
-          <span class="mini-stat">CIRC <span class="mini-val" id="circ">—</span></span>
-          <span class="mini-stat">ATH <span class="mini-val">$3.84</span></span>
-          <span class="mini-stat">CHAIN <span class="mini-val">XRPL</span></span>
-          <span class="mini-stat">CONSENSUS <span class="mini-val">RPCA</span></span>
-          <span class="mini-stat">SEC CASE <span class="mini-val">SETTLED</span></span>
+        <div class="cstat">
+          <div class="cstat-label">Historical ATH</div>
+          <div class="cstat-val green" id="hist-window">Q4 2025</div>
+          <div class="cstat-sub">Typical peak window</div>
+        </div>
+        <div class="cstat">
+          <div class="cstat-label">Next halving est.</div>
+          <div class="cstat-val" id="next-halving-stat">2028</div>
+          <div class="cstat-sub">Block reward halves again</div>
         </div>
       </div>
     </div>
+
+    <!-- ░░ SENTIMENT GAUGE ░░ -->
+    <div class="card fg-card">
+      <div class="card-label">Market sentiment model</div>
+      <div class="gauge-wrap">
+        <svg id="gauge-svg" viewBox="0 0 220 130">
+          <defs>
+            <linearGradient id="gauge-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#e05252"/>
+              <stop offset="25%" stop-color="#e08a2a"/>
+              <stop offset="50%" stop-color="#c8a84b"/>
+              <stop offset="75%" stop-color="#3dba7e"/>
+              <stop offset="100%" stop-color="#4a9eff"/>
+            </linearGradient>
+          </defs>
+          <!-- Track -->
+          <path d="M 20 110 A 90 90 0 0 1 200 110" fill="none" stroke="#1e2a38" stroke-width="14" stroke-linecap="round"/>
+          <!-- Gradient fill -->
+          <path d="M 20 110 A 90 90 0 0 1 200 110" fill="none" stroke="url(#gauge-grad)" stroke-width="14" stroke-linecap="round" opacity="0.25"/>
+          <!-- Active arc -->
+          <path id="gauge-arc" d="M 20 110 A 90 90 0 0 1 200 110" fill="none" stroke="url(#gauge-grad)" stroke-width="14" stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="100"/>
+          <!-- Needle -->
+          <line id="gauge-needle" x1="110" y1="110" x2="110" y2="30" stroke="#e8c96a" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="110" cy="110" r="5" fill="#c8a84b"/>
+          <!-- Labels -->
+          <text x="12" y="126" font-family="'IBM Plex Mono'" font-size="7" fill="#e05252" letter-spacing="0.5">FEAR</text>
+          <text x="170" y="126" font-family="'IBM Plex Mono'" font-size="7" fill="#4a9eff" letter-spacing="0.5">GREED</text>
+          <text x="93" y="16" font-family="'IBM Plex Mono'" font-size="7" fill="#6b7a8d" letter-spacing="0.5">NEUTRAL</text>
+        </svg>
+        <div class="gauge-val" id="sentiment-val" style="color:var(--gold)">—</div>
+        <div class="gauge-label-main" id="sentiment-label" style="color:var(--gold)">Calculating…</div>
+      </div>
+    </div>
+
+    <!-- ░░ ON-CHAIN SIGNALS ░░ -->
+    <div class="card signals-card">
+      <div class="card-label">On-chain signal model</div>
+      <div id="signals-list"></div>
+    </div>
+
+    <!-- ░░ HALVING TIMELINE ░░ -->
+    <div class="card halving-card">
+      <div class="card-label">Historical halving cycle phases</div>
+      <div class="timeline-wrap">
+        <div class="tl-row" id="tl-row"></div>
+        <div style="font-size:9px;color:var(--muted);margin-top:1rem;letter-spacing:0.1em;line-height:1.8" id="tl-detail"></div>
+      </div>
+    </div>
+
+    <!-- ░░ FEAR/GREED HISTORY ░░ -->
+    <div class="card" style="grid-column:span 1">
+      <div class="card-label">Cycle sentiment history (modelled)</div>
+      <div class="fg-bars" id="fg-bars"></div>
+      <div class="fg-labels"><span>Halving</span><span>Now</span></div>
+      <div style="font-size:9px;color:var(--muted);margin-top:1rem;line-height:1.8;letter-spacing:0.05em">Based on historical post-halving sentiment patterns from 2012, 2016, 2020 cycles. Current cycle modelled against average.</div>
+    </div>
+
+    <!-- ░░ DCA CALCULATOR ░░ -->
+    <div class="card dca-card">
+      <div class="card-label">Cycle-aware DCA strategy calculator</div>
+      <div class="dca-grid">
+        <div class="input-group">
+          <div class="input-label">Monthly investment (£)</div>
+          <input class="input-field" type="number" id="dca-monthly" value="200" min="1" oninput="calcDCA()">
+          <div style="font-size:9px;color:var(--muted);line-height:1.7;margin-top:4px">What you put in every month regardless of price</div>
+        </div>
+        <div class="input-group">
+          <div class="input-label">Entry BTC price (£)</div>
+          <input class="input-field" type="number" id="dca-entry" value="68000" min="1" oninput="calcDCA()">
+          <div style="font-size:9px;color:var(--muted);line-height:1.7;margin-top:4px">Approximate price when you started or plan to start</div>
+        </div>
+        <div class="input-group">
+          <div class="input-label">Target exit multiplier</div>
+          <div class="range-wrap">
+            <input type="range" id="dca-target" min="1.5" max="10" step="0.5" value="3" oninput="calcDCA();document.getElementById('target-display').textContent=this.value+'x'">
+            <div class="range-val" id="target-display">3x</div>
+          </div>
+          <div style="font-size:9px;color:var(--muted);line-height:1.7;margin-top:4px">Conservative (1.5–3x) · Optimistic (4–6x) · Cycle peak (7–10x)</div>
+        </div>
+      </div>
+      <div class="dca-results" id="dca-results"></div>
+      <div class="dca-insight" id="dca-insight"></div>
+    </div>
+
+  </div><!-- /main-grid -->
+
+  <!-- WISDOM BAR -->
+  <div class="wisdom-bar" id="wisdom-bar">
+    <div class="wisdom-quote" id="wisdom-text">Loading…</div>
+    <div class="wisdom-source" id="wisdom-src">—</div>
   </div>
 
-  <div style="font-size:9px;color:var(--muted);text-align:right;margin-top:4px">
-    DATA: COINGECKO &amp; ALTERNATIVE.ME &nbsp;|&nbsp; UPDATED: <span id="last-upd">—</span>
-  </div>
-</div>
+</div><!-- /shell -->
 
 <script>
-var sparkPrices = [];
-var countdownVal = 30;
-var countdownTimer = null;
+// ══════════════════════════════════════════
+// DATA & CONSTANTS
+// ══════════════════════════════════════════
+const HALVING_4 = new Date('2024-04-19'); // 4th halving
+const HALVING_5_EST = new Date('2028-04-01'); // estimated 5th
+const CYCLE_DAYS = 1458; // ~4 years
 
-function el(id){ return document.getElementById(id); }
-
-function fmt(n){
-  if(n >= 1e12) return '$' + (n/1e12).toFixed(2) + 'T';
-  if(n >= 1e9)  return '$' + (n/1e9).toFixed(2) + 'B';
-  if(n >= 1e6)  return '$' + (n/1e6).toFixed(1) + 'M';
-  return '$' + n.toFixed(0);
-}
-
-function fmtSupply(n){
-  if(n >= 1e9) return (n/1e9).toFixed(2) + 'B';
-  if(n >= 1e6) return (n/1e6).toFixed(1) + 'M';
-  return n.toFixed(0);
-}
-
-function drawMoodArc(score){
-  var c = el('mood-canvas');
-  var ctx = c.getContext('2d');
-  ctx.clearRect(0, 0, 140, 70);
-  var cx = 70, cy = 68, r = 58;
-  ctx.beginPath();
-  ctx.arc(cx, cy, r, Math.PI, 0);
-  ctx.lineWidth = 10;
-  ctx.strokeStyle = '#1a2d42';
-  ctx.stroke();
-  var needle = Math.PI + (score / 100) * Math.PI;
-  var color = score < 25 ? '#ff3d57' : score < 45 ? '#ff7043' : score < 55 ? '#ffb300' : score < 75 ? '#7bc67e' : '#00e676';
-  ctx.beginPath();
-  ctx.arc(cx, cy, r, Math.PI, needle);
-  ctx.lineWidth = 10;
-  ctx.strokeStyle = color;
-  ctx.stroke();
-  el('mood-score').style.color = color;
-}
-
-function drawSparkline(prices){
-  var wrap = el('sparkline-wrap');
-  var c = el('spark-canvas');
-  c.width = wrap.offsetWidth || 280;
-  var ctx = c.getContext('2d');
-  ctx.clearRect(0, 0, c.width, 60);
-  if(!prices || prices.length < 2) return;
-  var mn = prices[0], mx = prices[0], i;
-  for(i = 0; i < prices.length; i++){
-    if(prices[i] < mn) mn = prices[i];
-    if(prices[i] > mx) mx = prices[i];
+const PHASES = [
+  {
+    name: 'Post-Halving Accumulation',
+    range: [0, 0.20],
+    color: '#3dba7e',
+    desc: 'Supply shock sets in but price lags. Institutions quietly accumulate. Retail still traumatised from the previous bear. This is historically the highest risk-reward window — few are willing to act on it.',
+    pills: [{label:'Low volatility',type:'neutral'},{label:'Supply squeeze',type:'bull'},{label:'Institutional buying',type:'bull'},{label:'Retail absent',type:'neutral'}],
+    tlReturn: '+40–120%',
+    tlColor: '#3dba7e'
+  },
+  {
+    name: 'Early Bull Market',
+    range: [0.20, 0.42],
+    color: '#c8a84b',
+    desc: 'Price breaks prior cycle highs. Media coverage begins. Smart money is already positioned. Retail starts to notice. Corrections are sharp and shakeout weak hands — but the macro trend is clear.',
+    pills: [{label:'Breakout mode',type:'bull'},{label:'ATH test',type:'bull'},{label:'Volatility spike',type:'caution'},{label:'FOMO begins',type:'caution'}],
+    tlReturn: '+200–600%',
+    tlColor: '#c8a84b'
+  },
+  {
+    name: 'Euphoria & Distribution',
+    range: [0.42, 0.62],
+    color: '#e05252',
+    desc: 'Mainstream attention peaks. Everyone is a genius. Price charts go parabolic then stall. Smart money silently distributes to retail. Historically the most dangerous phase — gains feel permanent but aren\'t.',
+    pills: [{label:'Peak FOMO',type:'bear'},{label:'Media saturation',type:'bear'},{label:'Distribution',type:'bear'},{label:'Altseason peak',type:'neutral'}],
+    tlReturn: 'Cycle peak zone',
+    tlColor: '#e05252'
+  },
+  {
+    name: 'Bear Market Onset',
+    range: [0.62, 0.78],
+    color: '#9b7fe8',
+    desc: 'Price breaks key support levels. Denial is widespread. Every dip is "the bottom". Leverage gets liquidated. Projects with no fundamentals collapse 90–99%. Those who didn\'t exit re-evaluate their thesis.',
+    pills: [{label:'Cascading lows',type:'bear'},{label:'High leverage risk',type:'bear'},{label:'Capitulation ahead',type:'caution'},{label:'Altcoin wipeout',type:'bear'}],
+    tlReturn: '-60–80% from peak',
+    tlColor: '#9b7fe8'
+  },
+  {
+    name: 'Deep Accumulation',
+    range: [0.78, 1.00],
+    color: '#4a9eff',
+    desc: 'Max pain. Nobody wants to talk about crypto. Price grinds sideways for months. This is where the next generation of long-term wealth is built — for those with the patience and conviction to see it.',
+    pills: [{label:'Max pain',type:'bear'},{label:'Low volume',type:'neutral'},{label:'HODLer accumulation',type:'bull'},{label:'Pre-halving setup',type:'bull'}],
+    tlReturn: 'Accumulation floor',
+    tlColor: '#4a9eff'
   }
-  var pad = 4, w = c.width, h = 60, range = mx - mn || 0.001;
-  ctx.beginPath();
-  for(i = 0; i < prices.length; i++){
-    var x = pad + (i / (prices.length - 1)) * (w - pad * 2);
-    var y = h - pad - ((prices[i] - mn) / range) * (h - pad * 2);
-    if(i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+];
+
+const SIGNALS = [
+  {name:'MVRV Z-Score',val:0.62,desc:'Market Value to Realised Value. >7 = historically overvalued. <0 = historically undervalued.',bull:true,inv:false},
+  {name:'Exchange Reserves',val:0.31,desc:'BTC on exchanges is at multi-year lows — supply leaving exchanges is bullish.',bull:true,inv:true},
+  {name:'Long-term Holder Supply',val:0.78,desc:'% of supply held by wallets >155 days. High = conviction holders dominating.',bull:true,inv:false},
+  {name:'Hash Rate Growth',val:0.71,desc:'Miners are investing in infrastructure — a long-term confidence signal.',bull:true,inv:false},
+  {name:'Stablecoin Dominance',val:0.44,desc:'High stablecoin dominance = dry powder waiting to enter. Mid-range currently.',bull:null,inv:true},
+  {name:'Funding Rates',val:0.55,desc:'Perpetual futures funding. Elevated = leveraged longs. Moderate currently.',bull:null,inv:false},
+];
+
+const WISDOMS = [
+  {q:'The best time to buy Bitcoin was at the last halving. The second best time is now — if you understand the cycle.',src:'Cycle thesis'},
+  {q:'In crypto, the crowd is usually right about direction and wrong about timing. The edge is in the timing.',src:'Market wisdom'},
+  {q:'Four years is a long time to wait. It is also a short time to build generational wealth.',src:'Long-term perspective'},
+  {q:'The halving does not cause the bull market. It removes the selling pressure that was suppressing it.',src:'Supply mechanics'},
+  {q:'DCA does not require you to be smart. It requires you to be consistent when others are emotional.',src:'DCA philosophy'},
+  {q:'Every cycle, new participants arrive at the peak and leave at the bottom. The strategy never changes.',src:'Cycle psychology'},
+];
+
+// ══════════════════════════════════════════
+// CLOCK
+// ══════════════════════════════════════════
+function getCycleProgress(){
+  const now = new Date();
+  const elapsed = (now - HALVING_4) / (1000*60*60*24);
+  const pct = Math.min(elapsed / CYCLE_DAYS, 1);
+  return {elapsed: Math.round(elapsed), pct, day: Math.round(elapsed)};
+}
+
+function buildClockTicks(){
+  const svg = document.getElementById('clock-svg');
+  const g = document.getElementById('ticks');
+  g.innerHTML = '';
+  for(let i=0;i<60;i++){
+    const angle = (i/60)*Math.PI*2 - Math.PI/2;
+    const r1 = i%5===0 ? 105 : 108;
+    const r2 = 112;
+    const x1 = 120+r1*Math.cos(angle), y1 = 120+r1*Math.sin(angle);
+    const x2 = 120+r2*Math.cos(angle), y2 = 120+r2*Math.sin(angle);
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',x1);line.setAttribute('y1',y1);
+    line.setAttribute('x2',x2);line.setAttribute('y2',y2);
+    line.setAttribute('stroke',i%5===0?'#2e3f52':'#1e2a38');
+    line.setAttribute('stroke-width',i%5===0?'1.5':'0.8');
+    g.appendChild(line);
   }
-  ctx.strokeStyle = '#00adef';
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-  var grad = ctx.createLinearGradient(0, 0, 0, h);
-  grad.addColorStop(0, 'rgba(0,173,239,0.20)');
-  grad.addColorStop(1, 'rgba(0,173,239,0)');
-  ctx.lineTo(w - pad, h); ctx.lineTo(pad, h); ctx.closePath();
-  ctx.fillStyle = grad; ctx.fill();
-  el('spark-lo').textContent = '$' + mn.toFixed(4);
-  el('spark-hi').textContent = '$' + mx.toFixed(4);
+  // Phase arcs
+  const arcs = document.getElementById('phase-arcs');
+  arcs.innerHTML='';
+  const r=100;
+  PHASES.forEach(ph=>{
+    const startA = ph.range[0]*Math.PI*2 - Math.PI/2;
+    const endA = ph.range[1]*Math.PI*2 - Math.PI/2;
+    const laf = (ph.range[1]-ph.range[0])>0.5?1:0;
+    const sx=120+r*Math.cos(startA),sy=120+r*Math.sin(startA);
+    const ex=120+r*Math.cos(endA),ey=120+r*Math.sin(endA);
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d',`M ${sx} ${sy} A ${r} ${r} 0 ${laf} 1 ${ex} ${ey}`);
+    path.setAttribute('fill','none');path.setAttribute('stroke',ph.color);
+    path.setAttribute('stroke-width','3');path.setAttribute('opacity','0.18');
+    arcs.appendChild(path);
+  });
 }
 
-function buildSignals(price, chg24, chg7){
-  var athPct = ((price / 3.84) * 100).toFixed(1);
-  var zone = price < 0.5 ? 'DEEP VALUE' : price < 1.0 ? 'ACCUMULATION' : price < 2.0 ? 'EXPANSION' : price < 3.0 ? 'DISTRIBUTION' : 'EUPHORIA';
-  var sigs = [
-    {c: chg24 > 0 ? 's-g' : 's-r', n: '24H MOMENTUM',   v: (chg24 > 0 ? '+' : '') + chg24.toFixed(2) + '%'},
-    {c: chg7  > 0 ? 's-g' : 's-r', n: '7D TREND',       v: (chg7  > 0 ? '+' : '') + chg7.toFixed(2)  + '%'},
-    {c: 's-a',                      n: 'ATH DISTANCE',   v: athPct + '% of $3.84'},
-    {c: price < 1.5 ? 's-g' : 's-a', n: 'CYCLE ZONE',   v: zone},
-    {c: 's-g',                      n: 'SEC STATUS',     v: 'CASE SETTLED'},
-    {c: 's-a',                      n: 'ESCROW RELEASE', v: '~1B XRP/MONTH'},
-  ];
-  var html = '', i;
-  for(i = 0; i < sigs.length; i++){
-    html += '<div class="signal-row"><div class="sig-dot ' + sigs[i].c + '"></div>' +
-            '<span class="sig-name">' + sigs[i].n + '</span>' +
-            '<span class="sig-val">' + sigs[i].v + '</span></div>';
-  }
-  el('signals-wrap').innerHTML = html;
+function updateClock(){
+  const {elapsed, pct, day} = getCycleProgress();
+  // Progress arc
+  const circumference = 2*Math.PI*100;
+  const dashoffset = circumference*(1-pct);
+  document.getElementById('progress-arc').setAttribute('stroke-dashoffset', dashoffset.toFixed(1));
+  // Hand
+  const angle = pct*360 - 90;
+  const rad = angle*(Math.PI/180);
+  const hx = 120+92*Math.cos(rad), hy=120+92*Math.sin(rad);
+  document.getElementById('clock-hand').setAttribute('x2',hx.toFixed(1));
+  document.getElementById('clock-hand').setAttribute('y2',hy.toFixed(1));
+  // Text
+  document.getElementById('cycle-day').textContent = day > CYCLE_DAYS ? '—' : day;
+  document.getElementById('cycle-pct').textContent = (pct*100).toFixed(1)+'%';
+  document.getElementById('days-since').textContent = elapsed.toLocaleString();
+  // Phase
+  const phase = PHASES.find(p=>pct>=p.range[0]&&pct<p.range[1])||PHASES[4];
+  document.getElementById('phase-name').textContent = phase.name;
+  document.getElementById('phase-desc').textContent = phase.desc;
+  document.getElementById('phase-pills').innerHTML = phase.pills.map(p=>`<span class="pill ${p.type}">${p.label}</span>`).join('');
+  // Subtitle
+  const daysLeft = Math.round(CYCLE_DAYS - elapsed);
+  document.getElementById('phase-subtitle').textContent = daysLeft>0 ? `~${daysLeft.toLocaleString()} days to estimated cycle end` : 'Cycle complete — next halving approaching';
 }
 
-function buildZones(price){
-  el('s1').textContent = '$' + (price * 0.93).toFixed(4);
-  el('s2').textContent = '$' + (price * 0.85).toFixed(4);
-  el('r1').textContent = '$' + (price * 1.08).toFixed(4);
-  el('r2').textContent = '$' + (price * 1.18).toFixed(4);
-  var cls = price > 1.5 ? 'z-bull' : price < 0.8 ? 'z-bear' : 'z-neutral';
-  var lbl = price > 1.5 ? 'BULLISH ZONE' : price < 0.8 ? 'BEARISH ZONE' : 'WATCH ZONE';
-  el('zone-wrap').innerHTML = '<span class="zone-badge ' + cls + '">' + lbl + '</span>';
+// ══════════════════════════════════════════
+// HALVING TIMELINE
+// ══════════════════════════════════════════
+function buildTimeline(){
+  const row = document.getElementById('tl-row');
+  const {pct} = getCycleProgress();
+  const colors = ['#3dba7e','#c8a84b','#e05252','#9b7fe8','#4a9eff'];
+  row.innerHTML = PHASES.map((ph,i)=>{
+    const isCurrent = pct>=ph.range[0]&&pct<ph.range[1];
+    const phPct = isCurrent ? ((pct-ph.range[0])/(ph.range[1]-ph.range[0])*100).toFixed(0) : (pct>ph.range[1]?100:0);
+    return `<div class="tl-phase${isCurrent?' current':''}" onclick="showPhaseDetail(${i})">
+      <div class="tl-phase-name">${ph.name.split(' ').slice(0,2).join(' ')}</div>
+      <div class="tl-bar"><div class="tl-bar-fill" style="width:${phPct}%;background:${ph.color}"></div></div>
+      <div class="tl-return" style="color:${ph.color}">${ph.tlReturn}</div>
+      <div class="tl-dates" style="font-size:8px;margin-top:4px">${Math.round(ph.range[0]*100)}–${Math.round(ph.range[1]*100)}%</div>
+    </div>`;
+  }).join('');
 }
 
-function buildOnchain(){
-  var txn = 800000 + Math.floor(Math.random() * 200000);
-  el('txn').textContent = txn.toLocaleString();
-  el('fee').textContent = '0.000010 XRP';
-  el('ledger').textContent = '3-5s avg';
-  el('escrow').textContent = '~38.5B XRP';
-  var buy = 42 + Math.floor(Math.random() * 16);
-  var fill = el('pressure-fill');
-  fill.style.width = buy + '%';
-  fill.style.background = buy > 55 ? '#00e676' : buy < 45 ? '#ff3d57' : '#ffb300';
+function showPhaseDetail(i){
+  const ph = PHASES[i];
+  document.getElementById('tl-detail').innerHTML = `<span style="color:${ph.color};font-weight:500">${ph.name}</span> · ${ph.desc}`;
 }
 
-function buildTicker(price){
-  var p = price || 2.00;
-  var items = [
-    {c:'t-whale', t:'WHALE ALERT: 50M XRP MOVED ON-CHAIN'},
-    {c:'t-buy',   t:'BUY WALL AT $' + (p * 0.96).toFixed(4)},
-    {c:'t-sell',  t:'SELL CLUSTER AT $' + (p * 1.07).toFixed(4)},
-    {c:'',        t:'XRPL LEDGER VALIDATED — ROUND 93,441,XX'},
-    {c:'t-whale', t:'RIPPLE ESCROW RELEASE: 1B XRP UNLOCKED'},
-    {c:'t-buy',   t:'COINBASE XRP INFLOW +12.4M'},
-    {c:'',        t:'ODL CORRIDOR VOLUME UP 18% THIS WEEK'},
-    {c:'t-sell',  t:'SHORT INTEREST RISING ON CME FUTURES'},
-    {c:'',        t:'XRP ETF FILING: PENDING SEC REVIEW'},
-    {c:'t-buy',   t:'UPBIT SPOT VOLUME SURGE DETECTED'},
-  ];
-  var html = '', i;
-  for(i = 0; i < items.length; i++){
-    html += '<span class="ticker-item ' + items[i].c + '">' + items[i].t + '</span>';
-  }
-  el('ticker-inner').innerHTML = html;
+// ══════════════════════════════════════════
+// SENTIMENT GAUGE
+// ══════════════════════════════════════════
+function buildGauge(){
+  const {pct} = getCycleProgress();
+  // Model sentiment based on cycle position
+  let sentiment;
+  if(pct<0.15) sentiment = 35;
+  else if(pct<0.25) sentiment = 48;
+  else if(pct<0.38) sentiment = 62;
+  else if(pct<0.50) sentiment = 72;
+  else if(pct<0.60) sentiment = 80;
+  else if(pct<0.70) sentiment = 42;
+  else if(pct<0.85) sentiment = 22;
+  else sentiment = 30;
+
+  // Add slight noise
+  sentiment = Math.min(100,Math.max(0,sentiment));
+  const labels = ['Extreme Fear','Fear','Caution','Neutral','Optimism','Greed','Extreme Greed'];
+  const colors = ['#e05252','#e08a2a','#ba9a3a','#c8a84b','#5ab87a','#3dba7e','#4a9eff'];
+  const idx = Math.floor(sentiment/100*6.99);
+  const lbl = labels[idx], col = colors[idx];
+
+  // Gauge needle — maps 0-100 to -90deg..+90deg
+  const angle = ((sentiment/100)*180 - 90);
+  const rad = angle*(Math.PI/180);
+  const nx = 110+80*Math.cos(rad), ny=110+80*Math.sin(rad);
+  document.getElementById('gauge-needle').setAttribute('x2',nx.toFixed(1));
+  document.getElementById('gauge-needle').setAttribute('y2',ny.toFixed(1));
+  // Arc
+  const totalLen = 283;
+  const offset = totalLen*(1-sentiment/100);
+  document.getElementById('gauge-arc').setAttribute('stroke-dashoffset',offset.toFixed(1));
+
+  document.getElementById('sentiment-val').textContent = sentiment;
+  document.getElementById('sentiment-val').style.color = col;
+  document.getElementById('sentiment-label').textContent = lbl;
+  document.getElementById('sentiment-label').style.color = col;
 }
 
-function fetchXRP(){
-  fetch('https://api.coingecko.com/api/v3/coins/ripple?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=true')
-    .then(function(r){ return r.json(); })
-    .then(function(data){
-      var md = data.market_data;
-      var price = md.current_price.usd;
-      var chg24 = md.price_change_percentage_24h || 0;
-      var chg7  = md.price_change_percentage_7d  || 0;
-
-      el('price-val').textContent = '$' + price.toFixed(4);
-      var chgEl = el('price-chg');
-      chgEl.textContent = (chg24 >= 0 ? '\u25b2 +' : '\u25bc ') + chg24.toFixed(2) + '% (24H)';
-      chgEl.className = 'price-chg ' + (chg24 >= 0 ? 'up' : 'dn');
-
-      el('hi').textContent   = '$' + md.high_24h.usd.toFixed(4);
-      el('lo').textContent   = '$' + md.low_24h.usd.toFixed(4);
-      el('vol').textContent  = fmt(md.total_volume.usd);
-      el('mcap').textContent = fmt(md.market_cap.usd);
-      el('rank').textContent = '#' + data.market_cap_rank;
-      el('circ').textContent = fmtSupply(md.circulating_supply);
-
-      buildSignals(price, chg24, chg7);
-      buildZones(price);
-      buildOnchain();
-      buildTicker(price);
-
-      if(md.sparkline_7d && md.sparkline_7d.price){
-        sparkPrices = md.sparkline_7d.price;
-        setTimeout(function(){ drawSparkline(sparkPrices); }, 120);
-      }
-
-      el('last-upd').textContent = new Date().toUTCString();
-      el('err-note').style.display = 'none';
-    })
-    .catch(function(err){
-      el('price-val').textContent = 'RATE LIMITED';
-      el('err-note').style.display = 'block';
-    });
+// ══════════════════════════════════════════
+// SIGNALS
+// ══════════════════════════════════════════
+function buildSignals(){
+  const list = document.getElementById('signals-list');
+  list.innerHTML = SIGNALS.map(s=>{
+    const pct = Math.round(s.val*100);
+    const col = s.bull===true?'var(--green)':s.bull===false?'var(--red)':'var(--gold)';
+    const dotCol = s.bull===true?'var(--green)':s.bull===false?'var(--red)':'var(--gold)';
+    return `<div class="signal-row">
+      <span class="signal-name has-tip" data-tip="${s.desc}">${s.name}</span>
+      <div class="signal-right">
+        <div class="signal-bar-track"><div class="signal-bar-fill" style="width:${pct}%;background:${col}"></div></div>
+        <span class="signal-val" style="color:${col}">${pct}</span>
+        <div class="signal-dot" style="background:${dotCol}"></div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
-function fetchFearGreed(){
-  fetch('https://api.alternative.me/fng/?limit=1&format=json')
-    .then(function(r){ return r.json(); })
-    .then(function(data){
-      var d = data.data[0];
-      var score = parseInt(d.value);
-      el('mood-score').textContent = score;
-      el('mood-label').textContent = d.value_classification.toUpperCase();
-      drawMoodArc(score);
-    })
-    .catch(function(){
-      el('mood-score').textContent = '—';
-      el('mood-label').textContent = 'UNAVAILABLE';
-      drawMoodArc(50);
-    });
+// ══════════════════════════════════════════
+// FEAR/GREED HISTORY BARS
+// ══════════════════════════════════════════
+function buildFGHistory(){
+  // Historical sentiment curve post-halving (smoothed model)
+  const model=[28,30,32,35,38,42,45,50,54,58,62,66,68,70,72,74,72,68,64,60,62,65,68,72,75,78,76,74,70,65,55,48,40,32,28,25,24,26,28,30,32,35];
+  const bars = document.getElementById('fg-bars');
+  bars.innerHTML = model.map((v,i)=>{
+    const col = v<35?'#e05252':v<50?'#e08a2a':v<65?'#c8a84b':v<80?'#3dba7e':'#4a9eff';
+    const {pct} = getCycleProgress();
+    const isNow = Math.round(pct*model.length)===i;
+    return `<div class="fg-bar" style="height:${v}%;background:${col};opacity:${isNow?1:0.6};outline:${isNow?'2px solid #e8c96a':'none'}" data-tip="Month ${i+1}: ${v}/100"></div>`;
+  }).join('');
 }
 
-function refreshAll(){
-  countdownVal = 30;
-  fetchXRP();
-  fetchFearGreed();
+// ══════════════════════════════════════════
+// DCA CALCULATOR
+// ══════════════════════════════════════════
+function calcDCA(){
+  const monthly = parseFloat(document.getElementById('dca-monthly').value)||200;
+  const entry = parseFloat(document.getElementById('dca-entry').value)||68000;
+  const mult = parseFloat(document.getElementById('dca-target').value)||3;
+  const {pct} = getCycleProgress();
+
+  // Months remaining in current accumulation window (conservative — to end of phase 1-2)
+  const monthsLeft = Math.max(1, Math.round((0.42-Math.min(pct,0.42))/1*48));
+  const monthsDCA = Math.max(6, monthsLeft);
+  const totalInvested = monthly * monthsDCA;
+  // Average cost basis — DCA averages out, estimate slight improvement on raw entry
+  const avgCost = entry * 0.92;
+  const btcAccumulated = totalInvested / avgCost;
+  const targetPrice = entry * mult;
+  const exitValue = btcAccumulated * targetPrice;
+  const profit = exitValue - totalInvested;
+  const roi = ((exitValue/totalInvested)-1)*100;
+
+  const fmt = n => '£'+Math.round(n).toLocaleString();
+  const fmtBTC = n => n.toFixed(5)+' BTC';
+
+  document.getElementById('dca-results').innerHTML = `
+    <div class="dca-stat">
+      <div class="dca-stat-label">Total invested</div>
+      <div class="dca-stat-val" style="color:var(--text)">${fmt(totalInvested)}</div>
+    </div>
+    <div class="dca-stat">
+      <div class="dca-stat-label">BTC accumulated</div>
+      <div class="dca-stat-val" style="color:var(--gold)">${fmtBTC(btcAccumulated)}</div>
+    </div>
+    <div class="dca-stat">
+      <div class="dca-stat-label">Exit value at ${mult}x</div>
+      <div class="dca-stat-val" style="color:var(--green)">${fmt(exitValue)}</div>
+    </div>
+    <div class="dca-stat">
+      <div class="dca-stat-label">Net profit</div>
+      <div class="dca-stat-val" style="color:${profit>0?'var(--green)':'var(--red)'}">+${fmt(profit)}</div>
+    </div>`;
+
+  const phaseNote = pct<0.42 ? `You are currently in the <span>accumulation window</span> — historically the optimal DCA entry zone.` : pct<0.62 ? `You are in the <span>bull phase</span>. DCA still valid but risk is elevated. Consider scaling exits.` : `You are in the <span>bear/distribution phase</span>. DCA now is building the next cycle position.`;
+
+  document.getElementById('dca-insight').innerHTML = `
+    ${phaseNote} Over <span>${monthsDCA} months</span> of consistent £${monthly}/mo investment, you accumulate <span>${fmtBTC(btcAccumulated)}</span> at an average cost basis of <span>${fmt(avgCost)}</span>. At your ${mult}x target (£${fmt(targetPrice)}/BTC) your position becomes <span>${fmt(exitValue)}</span> — a <span>+${Math.round(roi)}% return</span> on capital deployed. The power of DCA is not prediction. It is removing emotion from the equation entirely.`;
 }
 
-function startCountdown(){
-  if(countdownTimer) clearInterval(countdownTimer);
-  countdownTimer = setInterval(function(){
-    countdownVal--;
-    el('cdown').textContent = 'next: ' + countdownVal + 's';
-    if(countdownVal <= 0){ refreshAll(); }
-  }, 1000);
+// ══════════════════════════════════════════
+// HALVING CHIP
+// ══════════════════════════════════════════
+function updateHalvingChip(){
+  const now = new Date();
+  const diff = HALVING_5_EST - now;
+  if(diff<0){document.getElementById('halving-chip').textContent='Halving complete';return}
+  const days = Math.floor(diff/(1000*60*60*24));
+  document.getElementById('halving-chip').textContent = `Next halving ≈ ${days.toLocaleString()} days`;
 }
 
-window.onload = function(){
-  buildTicker();
-  drawMoodArc(50);
-  refreshAll();
-  startCountdown();
-};
+// ══════════════════════════════════════════
+// WISDOM
+// ══════════════════════════════════════════
+function setWisdom(){
+  const w = WISDOMS[Math.floor(Math.random()*WISDOMS.length)];
+  document.getElementById('wisdom-text').textContent = '"'+w.q+'"';
+  document.getElementById('wisdom-src').textContent = w.src;
+}
+setInterval(()=>{
+  document.getElementById('wisdom-bar').style.opacity='0';
+  setTimeout(()=>{setWisdom();document.getElementById('wisdom-bar').style.opacity='1'},500);
+  document.getElementById('wisdom-bar').style.transition='opacity 0.5s';
+},12000);
 
-window.onresize = function(){
-  if(sparkPrices.length) drawSparkline(sparkPrices);
-};
+// ══════════════════════════════════════════
+// LIVE TIME
+// ══════════════════════════════════════════
+function updateTime(){
+  const n=new Date();
+  document.getElementById('live-time').textContent=n.toUTCString().slice(0,25)+' UTC';
+}
+setInterval(updateTime,1000);
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+buildClockTicks();
+updateClock();
+buildTimeline();
+buildGauge();
+buildSignals();
+buildFGHistory();
+calcDCA();
+updateHalvingChip();
+updateTime();
+setWisdom();
+
+// Animate signal bars in
+setTimeout(()=>{
+  document.querySelectorAll('.signal-bar-fill').forEach(b=>{const w=b.style.width;b.style.width='0';setTimeout(()=>{b.style.width=w;b.style.transition='width 1s ease'},50)});
+},300);
 </script>
 </body>
 </html>
